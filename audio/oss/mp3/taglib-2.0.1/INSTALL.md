@@ -1,18 +1,23 @@
 # TagLib Installation
+TagLib 安装
 
 TagLib uses the CMake build system. As a user, you will most likely want to
 build TagLib in release mode and install it into a system-wide location.
 This can be done using the following commands:
+TagLib 使用 CMake 构建系统。作为用户，您很可能希望在发布模式下构建 TagLib 并将其安装
+到系统范围的位置。可以使用以下命令完成此操作：
 
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release .
     make
     sudo make install
 
 In order to build the included examples, use the `BUILD_EXAMPLES` option:
+为了构建所包含的示例，请使用“BUILD_EXAMPLES”选项：
 
     cmake -DBUILD_EXAMPLES=ON [...]
 
 If you want to build TagLib without ZLib, you can use
+如果你想构建没有 ZLib 的 TagLib，你可以使用
 
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DWITH_ZLIB=OFF .
     make
@@ -20,11 +25,14 @@ If you want to build TagLib without ZLib, you can use
 
 See [cmake(1)](https://cmake.org/cmake/help/latest/manual/cmake.1.html) for
 generic help on running CMake.
+有关运行 CMake 的一般帮助，请参阅 [cmake(1)](https://cmake.org/cmake/help/latest/manual/cmake.1.html)。
 
 ## Build Options
+编译选项
 
 These are the most important build options. For details, have a look into the
 CMakeLists.txt file.
+这些是最重要的构建选项。有关详细信息，请查看 CMakeLists.txt 文件。
 
 | Option                  | Description                                        |
 |-------------------------|----------------------------------------------------|
@@ -48,18 +56,29 @@ If you want to install TagLib 2 alongside TagLib 1, you can use
 for both versions. The installed files will then include bin/taglib-2-config,
 include/taglib-2, cmake/taglib-2, pkgconfig/taglib-2.pc,
 pkgconfig/taglib_c-2.pc and the libraries have a suffix "-2".
+如果您想要同时安装 TagLib 2 和 TagLib 1，则可以使用
+`-DTAGLIB_INSTALL_SUFFIX=-2`，并确保两个版本的 `BUILD_EXAMPLES` 都不是 `ON`。
+安装的文件将包括 bin/taglib-2-config、include/taglib-2、cmake/taglib-2、pkgconfig/taglib-2.pc、
+pkgconfig/taglib_c-2.pc，并且库具有后缀“-2”。
 
 
 ## Dependencies
+依赖项
 
 A required dependency is [utf8cpp](https://github.com/nemtrif/utfcpp). You can
 install the corresponding package (libutfcpp-dev on Ubuntu, utf8cpp in Homebrew,
 utfcpp in vcpkg) or fetch the Git submodule with `git submodule update --init`.
+必需的依赖项是 [utf8cpp (https://github.com/nemtrif/utfcpp)。您可以安装相应的软件包（Ubuntu
+上的 libutfcpp-dev、Homebrew 中的 utf8cpp、vcpkg 中的 utfcpp）或使用 `git submodule update --init`
+获取 Git 子模块。
 
 Optional dependencies are
+可选依赖项包括
 - [zlib](https://www.zlib.net/): You can disable it with `-DWITH_ZLIB=OFF`,
   build and install it from the sources or use a package (zlib1g-dev on Ubuntu,
   zlib in vcpkg). It is needed for compressed ID3v2 frames.
+  [zlib](https://www.zlib.net/): 你可以使用 `-DWITH_ZLIB=OFF` 禁用它，从源代码构建并安装它或使用软件包（Ubuntu 上的 zlib1g-dev，vcpkg 中的 zlib）。它是压缩 ID3v2 帧所必需的。
+
 - [CppUnit](https://wiki.documentfoundation.org/Cppunit): Is required for unit
   tests, which are disabled by default. If you enable them with
   `-DBUILD_TESTING=ON`, you can build and install it from the sources or use a
@@ -67,6 +86,9 @@ Optional dependencies are
   If the unit tests are enabled, you can run them with your build tool
   (`make check`, `ninja check`) or via CMake
   `cmake --build /path/to/build-dir --target check`.
+  [CppUnit](https://wiki.documentfoundation.org/Cppunit)：单元测试需要它，默认情况下禁用。如果您使用 `-DBUILD_TESTING=ON` 启用它，则可以从源代码构建和安装它，也可以使用软件包（Ubuntu 上的 libcppunit-dev、
+  Homebrew 中的 cppunit、vcpkg 中的 cppunit）。如果启用了单元测试，您可以使用构建工具（`make check`、
+  `ninja check`）或通过 CMake `cmake --build /path/to/build-dir --target check` 运行它们。
 
 ## UNIX (Including Linux, BSD and macOS)
 
