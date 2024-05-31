@@ -28,6 +28,8 @@
 // it considers specializations with and without class types
 // to be different; this define forces Map to use only the
 // specialization with the class keyword.
+// Sun Studio 发现了 Map 的多个专门化，因为它认为具有和不具有类类型的专门化是不同的；
+// 这个定义强制 Map 仅使用带有 class 关键字的专门化。
 #define WANT_CLASS_INSTANTIATION_OF_MAP (1)
 #endif
 
