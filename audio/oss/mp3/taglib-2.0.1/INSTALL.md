@@ -97,9 +97,12 @@ Optional dependencies are
 On Linux, you can install the dependencies using the package manager of your
 distribution. On macOS with Homebrew, you can use `brew install cppunit utf8cpp`
 to install the dependencies.
+在 Linux 上，您可以使用发行版的包管理器安装依赖项。在装有 Homebrew 的 macOS 上，您可以使用“brew
+install cppunit utf8cpp”来安装依赖项。
 
 ```
 # Adapt these environment variables to your directories
+使这些环境变量适应您的目录
 TAGLIB_SRC_DIR=$HOME/projects/taglib/src/taglib
 TAGLIB_DST_DIR=$HOME/projects/taglib/src/build
 cd $TAGLIB_SRC_DIR
@@ -110,9 +113,11 @@ cmake --build $TAGLIB_DST_DIR --config Release
 cmake --build $TAGLIB_DST_DIR --config Release --target check
 
 # Install to ~/pkg folder
+安装到 ~/pkg 文件夹
 cmake --install $TAGLIB_DST_DIR --config Release --prefix $HOME/pkg --strip
 
 # Run example from installed package
+从已安装的包运行示例
 LD_LIBRARY_PATH=$HOME/pkg/lib $HOME/pkg/bin/tagreader /path/to/audio-file
 ```
 
