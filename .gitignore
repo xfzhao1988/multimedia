@@ -3,3 +3,9 @@
 *.a
 *.so
 .vscode/*
+#mp3 ignore options
+audio/oss/mp3/media/*
+audio/oss/mp3/build/*
+#taglib-2.0.1 ignore options
+audio/oss/mp3/taglib-2.0.1/build/*
+audio/oss/mp3/taglib-2.0.1/install/*
