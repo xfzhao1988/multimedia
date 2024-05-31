@@ -12,8 +12,28 @@
 
 set -e
 
-mkdir build
-mkdir install
+# 指定要检查的文件夹路径
+build_path="./build"
+install_path="./install"
+# 检查文件夹是否存在
+if [ ! -d "$build_path" ]; then
+    # 如果文件夹不存在，则创建文件夹
+    mkdir -p "$build_path"
+    echo "Folder does not exist. Created $build_path"
+else
+    # 如果文件夹已经存在，则输出提示信息
+    echo "Folder already exists. Skipped creation."
+fi
+
+# 检查文件夹是否存在
+if [ ! -d "$install_path" ]; then
+    # 如果文件夹不存在，则创建文件夹
+    mkdir -p "$install_path"
+    echo "Folder does not exist. Created $install_path"
+else
+    # 如果文件夹已经存在，则输出提示信息
+    echo "Folder already exists. Skipped creation."
+fi
 
 TAGLIB_SRC_DIR=/home/zxf/study/3_multimedia/audio/oss/mp3/taglib-2.0.1
 TAGLIB_DST_DIR=/home/zxf/study/3_multimedia/audio/oss/mp3/taglib-2.0.1/build
