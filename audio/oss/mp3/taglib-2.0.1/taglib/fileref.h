@@ -37,20 +37,26 @@ namespace TagLib {
   class Tag;
 
   //! This class provides a simple abstraction for creating and handling files
+  //  此类提供了创建和处理文件的简单抽象
 
   /*!
    * FileRef exists to provide a minimal, generic and value-based wrapper around
    * a File.  It is lightweight and implicitly shared, and as such suitable for
    * pass-by-value use.  This hides some of the uglier details of TagLib::File
    * and the non-generic portions of the concrete file implementations.
+   * FileRef 的存在是为了为文件提供一个最小、通用且基于值的包装器。它是轻量级的，并且隐式共享，
+   * 因此适合按值传递使用。这隐藏了 TagLib::File 的一些较丑陋的细节以及具体文件实现的非通用部分。
    *
    * This class is useful in a "simple usage" situation where it is desirable
    * to be able to get and set some of the tag information that is similar
    * across file types.
+   * 此类在“简单使用”情况下很有用，在这种情况下，希望能够获取和设置一些跨文件类型相似的标签信息。
    *
    * Also note that it is probably a good idea to plug this into your mime
    * type system rather than using the constructor that accepts a file name using
    * the FileTypeResolver.
+   * 还要注意，将其插入到你的 mime 类型系统中可能是一个好主意，而不是使用通过 FileTypeResolver 接受文件名
+   * 的构造函数。
    *
    * \see FileTypeResolver
    * \see addFileTypeResolver()

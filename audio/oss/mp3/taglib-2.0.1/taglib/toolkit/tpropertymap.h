@@ -31,6 +31,7 @@
 
 #ifdef _MSC_VER
 // Explained at end of tpropertymap.cpp
+//在 tpropertymap.cpp 末尾解释
 TAGLIB_MSVC_SUPPRESS_WARNING_NEEDS_TO_HAVE_DLL_INTERFACE
 extern template class TagLib::Map<TagLib::String, TagLib::StringList>;
 #endif
