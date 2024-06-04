@@ -1,11 +1,14 @@
 
 Informal standard                                             M. Nilsson
+非正式标准
 Document: id3v2-00.txt                                   26th March 1998
 
 
                             ID3 tag version 2
+                            ID3 标签版本 2
 
 Status of this document
+本文档的状态
 
    This document is an Informal standard and is released so that
    implementors could have a set standard before the formal standard is
@@ -13,15 +16,22 @@ Status of this document
    identical to what is described in this document. The contents in this
    document may change for clarifications but never for added or altered
    functionallity.
+   本文档为非正式标准，发布后，实施者可以在正式标准制定之前拥有一套标准。
+   如果正式标准与本文档中描述的内容不完全相同，则将使用其他版本号。
+   本文档中的内容可能会因澄清而更改，但绝不会因添加或更改功能而更改。
 
    Distribution of this document is unlimited.
+   本文件的分发不受限制。
 
 
 Abstract
+概要
 
    The recent gain of popularity for MPEG layer III audio files on the
    internet forced a standardised way of storing information about an
    audio file within itself to determinate its origin and contents.
+   MPEG 第三层音频文件在互联网上越来越受欢迎，这迫使人们采用一种标准化的方式
+   在音频文件内部存储有关音频文件的信息，以确定其来源和内容。
 
    Today the most accepted way to do this is with the so called ID3 tag,
    which is simple but very limited and in some cases very unsuitable.
@@ -30,54 +40,57 @@ Abstract
    end of a the file, which is unsuitable for streaming audio. This draft
    is an attempt to answer these issues with a new version of the ID3
    tag.
+   目前最常用的方法是使用所谓的 ID3 标签，这种方法虽然简单，但功能非常有限，在某些情况下非常不合适。
+   ID3 标签在每个字段中的空间非常有限，字段数量也非常有限，不可扩展或升级，并且位于文件末尾，不适合流式
+   音频。本草案试图通过新版本的 ID3 标签来解决这些问题。
 
 
-1.   Table of contents
+1.   Table of contents //目录
 
-   2.   Conventions in this document
-   3.   ID3v2 overview
-     3.1.   ID3v2 header
-     3.2.   ID3v2 frames overview
-   4.   Declared ID3v2 frames
-     4.1.   Unique file identifier
-     4.2.   Text information frames
-       4.2.1.   Text information frames - details
-       4.2.2.   User defined text information frame
-     4.3.   URL link frames
-       4.3.1.   URL link frames - details
-       4.3.2.   User defined URL link frame
-     4.4.   Involved people list
-     4.5.   Music CD Identifier
-     4.6.   Event timing codes
-     4.7.   MPEG location lookup table
-     4.8.   Synced tempo codes
-     4.9.   Unsychronised lyrics/text transcription
-     4.10.  Synchronised lyrics/text
-     4.11.  Comments
-     4.12.  Relative volume adjustment
-     4.13.  Equalisation
-     4.14.  Reverb
-     4.15.  Attached picture
-     4.16.  General encapsulated object
-     4.17.  Play counter
-     4.18.  Popularimeter
-     4.19.  Recommended buffer size
-     4.20.  Encrypted meta frame
-     4.21.  Audio encryption
-     4.22.  Linked information
-   5.   The 'unsynchronisation scheme'
-   6.   Copyright
-   7.   References
-   8.   Appendix
-     A.   Appendix A - ID3-Tag Specification V1.1
-       A.1.   Overview
-       A.2.   ID3v1 Implementation
-       A.3.   Genre List
-       A.4.   Track addition - ID3v1.1
-   9.   Author's Address
+   2.   Conventions in this document //本文档中的约定
+   3.   ID3v2 overview //ID3v2 概述
+     3.1.   ID3v2 header //ID3v2 标头
+     3.2.   ID3v2 frames overview //ID3v2 帧概述
+   4.   Declared ID3v2 frames //声明的 ID3v2 帧
+     4.1.   Unique file identifier //唯一文件标识符
+     4.2.   Text information frames //文本信息帧
+       4.2.1.   Text information frames - details //文本信息帧 - 详细信息
+       4.2.2.   User defined text information frame //用户定义文本信息框
+     4.3.   URL link frames //URL 链接帧
+       4.3.1.   URL link frames - details //URL 链接帧 - 详细信息
+       4.3.2.   User defined URL link frame //用户定义URL链接帧
+     4.4.   Involved people list //参与人员名单
+     4.5.   Music CD Identifier //音乐 CD 标识符
+     4.6.   Event timing codes //事件计时代码
+     4.7.   MPEG location lookup table //MPEG 位置查找表
+     4.8.   Synced tempo codes //同步节奏代码
+     4.9.   Unsychronised lyrics/text transcription //不同步的歌词/文本转录
+     4.10.  Synchronised lyrics/text //同步的歌词/文字
+     4.11.  Comments //评论
+     4.12.  Relative volume adjustment //相对音量调节
+     4.13.  Equalisation //均衡
+     4.14.  Reverb //混响
+     4.15.  Attached picture //附图
+     4.16.  General encapsulated object //通用封装对象
+     4.17.  Play counter //播放计数器
+     4.18.  Popularimeter //人气指数
+     4.19.  Recommended buffer size //建议的缓冲区大小
+     4.20.  Encrypted meta frame //加密元数据帧
+     4.21.  Audio encryption //音频加密
+     4.22.  Linked information //链接信息
+   5.   The 'unsynchronisation scheme' //“不同步方案”
+   6.   Copyright //版权
+   7.   References //参考
+   8.   Appendix //附录
+     A.   Appendix A - ID3-Tag Specification V1.1 //附录 A——ID3 标签规范 V1.1
+       A.1.   Overview //概述
+       A.2.   ID3v1 Implementation //ID3v1 实现
+       A.3.   Genre List //类型列表
+       A.4.   Track addition - ID3v1.1 //曲目添加 - ID3v1.1
+   9.   Author's Address //作者地址
 
 
-2.   Conventions in this document
+2.   Conventions in this document //本文档中的约定
 
    In the examples, text within "" is a text string exactly as it appears
    in a file. Numbers preceded with $ are hexadecimal and numbers
@@ -85,19 +98,26 @@ Abstract
    unknown content. %x is used to indicate a bit with unknown content.
    The most significant bit (MSB) of a byte is called 'bit 7' and the
    least significant bit (LSB) is called 'bit 0'.
+   在示例中，“”内的文本是与文件中显示的完全相同的文本字符串。以 $ 开头的数字是十六
+   进制的，以 % 开头的数字是二进制的。$xx 用于表示内容未知的字节。%x 用于表示内容
+   未知的位。字节的最高有效位 (MSB) 称为“位 7”，最低有效位 (LSB) 称为“位 0”。
 
    A tag is the whole tag described in this document. A frame is a block
    of information in the tag. The tag consists of a header, frames and
    optional padding. A field is a piece of information; one value, a
    string etc. A numeric string is a string that consists of the
    characters 0-9 only.
+   标签是本文档中描述的整个标签。帧是标签中的一块信息。标签由标头、帧和可选填充组成。
+   字段是一条信息；一个值、一个字符串等。数字字符串是仅由字符 0-9 组成的字符串。
 
 
-3.   ID3v2 overview
+3.   ID3v2 overview //ID3v2 概述
 
    The two biggest design goals were to be able to implement ID3v2
    without disturbing old software too much and that ID3v2 should be
    expandable.
+   两个最大的设计目标是能够在不对旧软件造成太多干扰的情况下实现 ID3v2，
+   并且 ID3v2 具有可扩展性。
 
    The first criterion is met by the simple fact that the MPEG [MPEG]
    decoding software uses a syncsignal, embedded in the audiostream, to
@@ -106,6 +126,10 @@ Abstract
    reason, coincidence make a syncsignal appear within the tag it will be
    taken care of by the 'unsynchronisation scheme' described in section
    5.
+   第一个标准满足一个简单的事实，即 MPEG [MPEG] 解码软件使用嵌入在音频流中的同步
+   信号来“锁定”音频。由于 ID3v2 标签不包含有效的同步信号，因此没有软件会尝试播放
+   该标签。如果出于任何原因，巧合导致同步信号出现在标签内，它将由第 5 节中描述
+   的“非同步方案”处理。
 
    The second criterion has made a more noticeable impact on the design
    of the ID3v2 tag. It is constructed as a container for several
@@ -113,17 +137,26 @@ Abstract
    the software that encounters them. At the start of every frame there
    is an identifier that explains the frames's format and content, and a
    size descriptor that allows software to skip unknown frames.
+   第二个标准对 ID3v2 标签的设计产生了更明显的影响。它被构造为几个信息块（称为帧）
+   的容器，遇到它们的软件无需知道其格式。每个帧的开头都有一个标识符来解释帧的格式
+   和内容，还有一个大小描述符，允许软件跳过未知帧。
 
    If a total revision of the ID3v2 tag should be needed, there is a
    version number and a size descriptor in the ID3v2 header.
+   如果需要对 ID3v2 标签进行全面修订，则 ID3v2 标头中有一个版本号和一个大小描述符。
 
    The ID3 tag described in this document is mainly targeted to files
    encoded with MPEG-2 layer I, MPEG-2 layer II, MPEG-2 layer III and
    MPEG-2.5, but may work with other types of encoded audio.
+   本文档中描述的 ID3 标签主要针对用 MPEG-2 层 I、MPEG-2 层 II、MPEG-2 层 III
+   和 MPEG-2.5 编码的文件，但也可能适用于其他类型的编码音频。
 
    The bitorder in ID3v2 is most significant bit first (MSB). The
    byteorder in multibyte numbers is most significant byte first (e.g.
    $12345678 would be encoded $12 34 56 78).
+   ID3v2中的位顺序是最高有效位优先（MSB）。这个
+   多字节数中的字节顺序是最高有效字节优先（例如。
+   $1234678将被编码为$12 34 56 78）。
 
    It is permitted to include padding after all the final frame (at the
    end of the ID3 tag), making the size of all the frames together
@@ -131,12 +164,16 @@ Abstract
    of this padding is to allow for adding a few additional frames or
    enlarge existing frames within the tag without having to rewrite the
    entire file. The value of the padding bytes must be $00.
+   允许在所有最终帧之后（在ID3标签的末尾）包括填充，使所有帧的大小一起小于标签头
+   部给定的大小。这种填充的一个可能目的是允许添加一些额外的帧或放大标签内的现有帧，
+   而不必重写整个文件。填充字节的值必须为$00。
 
 
-3.1.   ID3v2 header
+3.1.   ID3v2 header //ID3v2标头
 
    The ID3v2 tag header, which should be the first information in the
    file, is 10 bytes as follows:
+   ID3v2标记头应该是文件中的第一个信息，它是10个字节，如下所示：
 
      ID3/file identifier      "ID3"
      ID3 version              $02 00
@@ -150,33 +187,47 @@ Abstract
    major versions are not. If software with ID3v2 and below support
    should encounter version three or higher it should simply ignore the
    whole tag. Version and revision will never be $FF.
+   标记的前三个字节总是“ID3”，表示这是一个ID3标记，后面直接跟两个版本字节。
+   ID3版本的第一个字节是它的主要版本，而第二个字节是其修订号。所有修订版都向后兼容，
+   而主要版本则不兼容。如果支持ID3v2及以下版本的软件遇到第三版或更高版本，则应忽略
+   整个标签。版本和修订永远不会是$FF。
 
    The first bit (bit 7) in the 'ID3 flags' is indicating whether or not
    unsynchronisation is used (see section 5 for details); a set bit
    indicates usage.
+   “ID3标志”中的第一个比特（比特7）指示是否使用了不同步（详见第5节）；设置比特指示使用。
 
    The second bit (bit 6) is indicating whether or not compression is
    used; a set bit indicates usage. Since no compression scheme has been
    decided yet, the ID3 decoder (for now) should just ignore the entire
    tag if the compression bit is set.
+   第二比特（比特6）指示是否使用压缩；设置比特指示使用。由于尚未决定压缩方案，
+   因此如果设置了压缩位，则ID3解码器（目前）应忽略整个标签。
 
    The ID3 tag size is encoded with four bytes where the first bit (bit
    7) is set to zero in every byte, making a total of 28 bits. The zeroed
    bits are ignored, so a 257 bytes long tag is represented as $00 00 02
    01.
+   ID3标签大小用四个字节编码，其中每个字节中的第一个比特（比特7）被设置为零，
+   总共28个比特。零位被忽略，因此257字节长的标签表示为$000 02 01。
 
    The ID3 tag size is the size of the complete tag after
    unsychronisation, including padding, excluding the header (total tag
    size - 10). The reason to use 28 bits (representing up to 256MB) for
    size description is that we don't want to run out of space here.
+   ID3标记大小是取消同步后完整标记的大小，包括填充，不包括标头（总标记大小-10）。
+   使用28位（表示高达256MB）进行大小描述的原因是我们不想在这里耗尽空间。
 
    A ID3v2 tag can be detected with the following pattern:
      $49 44 33 yy yy xx zz zz zz zz
    Where yy is less than $FF, xx is the 'flags' byte and zz is less than
    $80.
+   可以使用以下模式检测ID3v2标签：
+   $49 44 33 yy yy xx zz zz zz zz
+   其中yy小于$FF，xx是“flags”字节，zz小于$80。
 
 
-3.2.   ID3v2 frames overview
+3.2.   ID3v2 frames overview //ID3v2帧概述
 
    The headers of the frames are similar in their construction. They
    consist of one three character identifier (capital A-Z and 0-9) and
@@ -185,19 +236,28 @@ Abstract
    are for experimental use and free for everyone to use. Have in mind
    that someone else might have used the same identifier as you. All
    other identifiers are either used or reserved for future use.
+   帧的头部结构相似。它们由一个三字符标识符（大写A-Z和0-9）和一个三字节大小
+   的字段组成，总共六个字节。标头已从大小中排除。以“X”、“Y”和“Z”开头的标识符
+   仅供实验使用，每个人都可以免费使用。请记住，其他人可能使用了与您相同的标识符。
+   所有其他标识符要么被使用，要么被保留以供将来使用。
 
    The three character frame identifier is followed by a three byte size
    descriptor, making a total header size of six bytes in every frame.
    The size is calculated as framesize excluding frame identifier and
    size descriptor (frame size - 6).
+   三个字符的帧标识符后面跟着一个三字节大小的描述符，使每个帧的总报头大小为六个字节。
+   大小计算为帧大小，不包括帧标识符和大小描述符（帧大小-6）。
 
-   There is no fixed order of the frames' appearance in the tag, although
+   There is no fixed order of the frames appearance in the tag, although
    it is desired that the frames are arranged in order of significance
    concerning the recognition of the file. An example of such order:
    UFI, MCI, TT2 ...
+   在标签中不存在帧出现的固定顺序，尽管希望按照关于文件识别的重要顺序排列帧。
+   例如：UFI、MCI、TT2。。。
 
    A tag must contain at least one frame. A frame must be at least 1 byte
    big, excluding the 6-byte header.
+   标记必须至少包含一个帧。一个帧必须至少有1字节大，不包括6字节的标头。
 
    If nothing else is said a string is represented as ISO-8859-1
    [ISO-8859-1] characters in the range $20 - $FF. All unicode strings
@@ -369,7 +429,7 @@ Abstract
 
   TP3
    The 'Conductor' frame is used for the name of the conductor.
-   
+
   TP4
    The 'Interpreted, remixed, or otherwise modified by' frame contains
    more information about the people behind a remix and similar
@@ -406,14 +466,14 @@ Abstract
    can figure out any genre)" or "(55)((I think...)". The following new
    content types is defined in ID3v2 and is implemented in the same way
    as the numerig content types, e.g. "(RX)".
-   
+
      RX  Remix
      CR  Cover
 
   TAL
    The 'Album/Movie/Show title' frame is intended for the title of the
    recording(/source of sound) which the audio in the file is taken from.
-   
+
   TPA
    The 'Part of a set' frame is a numeric string that describes which
    part of a set the audio came from. This frame is used if the source
@@ -446,7 +506,7 @@ Abstract
    The 'Time' frame is a numeric string in the HHMM format containing
    the time for the recording. This field is always four characters
    long.
-   
+
   TRD
    The 'Recording dates' frame is a intended to be used as complement to
    the "TYE", "TDA" and "TIM" frames. E.g. "4th-7th June, 12th June" in
@@ -485,10 +545,10 @@ Abstract
       /76    76.59 rpm
       /78    78.26 rpm
       /80    80 rpm
-     
+
     MD     MiniDisc
       /A    Analog transfer from media
-     
+
     DAT    DAT
       /A    Analog transfer from media
       /1    standard, 48 kHz/16 bits, linear
@@ -497,18 +557,18 @@ Abstract
       /4    mode 4, 32 kHz/12 bits, 4 channels
       /5    mode 5, 44.1 kHz/16 bits, linear
       /6    mode 6, 44.1 kHz/16 bits, 'wide track' play
-     
+
     DCC    DCC
       /A    Analog transfer from media
-    
+
     DVD    DVD
       /A    Analog transfer from media
-    
+
     TV     Television
       /PAL    PAL
       /NTSC   NTSC
       /SECAM  SECAM
-    
+
     VID    Video
       /PAL    PAL
       /NTSC   NTSC
@@ -516,16 +576,16 @@ Abstract
       /VHS    VHS
       /SVHS   S-VHS
       /BETA   BETAMAX
-    
+
     RAD    Radio
       /FM   FM
       /AM   AM
       /LW   LW
       /MW   MW
-    
+
     TEL    Telephone
       /I    ISDN
-    
+
     MC     MC (normal cassette)
       /4    4.75 cm/s (normal speed for a two sided cassette)
       /9    9.5 cm/s
@@ -533,7 +593,7 @@ Abstract
       /II   Type II cassette (chrome)
       /III  Type III cassette (ferric chrome)
       /IV   Type IV cassette (metal)
-    
+
     REE    Reel
       /9    9.5 cm/s
       /19   19 cm/s
@@ -547,14 +607,14 @@ Abstract
   TFT
    The 'File type' frame indicates which type of audio this tag defines.
    The following type and refinements are defined:
-   
+
      MPG    MPEG Audio
        /1     MPEG 2 layer I
        /2     MPEG 2 layer II
        /3     MPEG 2 layer III
        /2.5   MPEG 2.5
        /AAC   Advanced audio compression
-     
+
    but other types may be used, not for these types though. This is used
    in a similar way to the predefined types in the "TMT" frame, but
    without parenthesis. If this frame is not present audio type is
@@ -626,7 +686,7 @@ Abstract
    The 'Original album/Movie/Show title' frame is intended for the title
    of the original recording(/source of sound), if for example the music
    in the file should be a cover of a previously released song.
-   
+
   TOA
    The 'Original artist(s)/performer(s)' frame is intended for the
    performer(s) of the original recording, if for example the music in
@@ -671,7 +731,7 @@ Abstract
    information should be ignored and not be displayed. All URL link
    frames have the following format:
 
-     URL link frame   "W00" - "WZZ" , excluding "WXX" 
+     URL link frame   "W00" - "WZZ" , excluding "WXX"
                                       (described in 4.3.2.)
      Frame size       $xx xx xx
      URL              <textstring>
@@ -682,25 +742,25 @@ Abstract
   WAF
    The 'Official audio file webpage' frame is a URL pointing at a file
    specific webpage.
-   
+
   WAR
    The 'Official artist/performer webpage' frame is a URL pointing at
    the artists official webpage. There may be more than one "WAR" frame
    in a tag if the audio contains more than one performer.
-   
+
   WAS
    The 'Official audio source webpage' frame is a URL pointing at the
    official webpage for the source of the audio file, e.g. a movie.
-   
+
   WCM
    The 'Commercial information' frame is a URL pointing at a webpage
    with information such as where the album can be bought. There may be
    more than one "WCM" frame in a tag.
-   
+
   WCP
    The 'Copyright/Legal information' frame is a URL pointing at a
    webpage where the terms of use and ownership of the file is described.
-   
+
   WPB
    The 'Publishers official webpage' frame is a URL pointing at the
    official wepage for the publisher.
@@ -761,9 +821,9 @@ Abstract
      Event timing codes   "ETC"
      Frame size           $xx xx xx
      Time stamp format    $xx
-     
+
    Where time stamp format is:
-     
+
      $01  Absolute time, 32 bit sized, using MPEG [MPEG] frames as unit
      $02  Absolute time, 32 bit sized, using milliseconds as unit
 
@@ -824,7 +884,7 @@ Abstract
    the 6th frame etc. In a similar way the 'bytes between reference' and
    'milliseconds between reference' points out bytes and milliseconds
    respectively.
-   
+
    Each reference consists of two parts; a certain number of bits, as
    defined in 'bits for bytes deviation', that describes the difference
    between what is said in 'bytes between reference' and the reality and
@@ -834,7 +894,7 @@ Abstract
    in every reference, i.e. 'bits for bytes deviation'+'bits for
    milliseconds deviation', must be a multiple of four. There may only be
    one "MLL" frame in each tag.
-   
+
      Location lookup table          "MLL"
      ID3 frame size                 $xx xx xx
      MPEG frames between reference  $xx xx
@@ -874,7 +934,7 @@ Abstract
      Tempo data          <binary data>
 
    Where time stamp format is:
-     
+
      $01  Absolute time, 32 bit sized, using MPEG [MPEG] frames as unit
      $02  Absolute time, 32 bit sized, using milliseconds as unit
 
@@ -932,7 +992,7 @@ Abstract
                    $05 is chord (e.g. "Bb F Fsus")
 
    Time stamp format is:
-     
+
      $01  Absolute time, 32 bit sized, using MPEG [MPEG] frames as unit
      $02  Absolute time, 32 bit sized, using milliseconds as unit
 
@@ -1192,7 +1252,7 @@ Abstract
    eight bits bigger in the same away as the play counter ("CNT").
    There may be more than one "POP" frame in each tag, but only one with
    the same email address.
-   
+
      Popularimeter   "POP"
      Frame size      $xx xx xx
      Email to user   <textstring> $00
@@ -1298,20 +1358,20 @@ Abstract
    contents. A linked frame is to be considered as part of the tag and
    has the same restrictions as if it was a physical part of the tag
    (i.e. only one "REV" frame allowed, whether it's linked or not).
-   
+
      Linked information  "LNK"
      Frame size          $xx xx xx
      Frame identifier    $xx xx xx
      URL                 <textstring> $00 (00)
      Additional ID data  <textstring(s)>
-   
+
    Frames that may be linked and need no additional data are "IPL",
    "MCI", "ETC", "LLT", "STC", "RVA", "EQU", "REV", "BUF", the text
    information frames and the URL link frames.
-   
+
    The "TXX", "PIC", "GEO", "CRM" and "CRA" frames may be linked with the
    content descriptor as additional ID data.
-   
+
    The "COM", "SLT" and "ULT" frames may be linked with three bytes of
    language descriptor directly followed by a content descriptor as
    additional ID data.
@@ -1345,7 +1405,7 @@ Abstract
    flags' should be set. This bit should only be set if the tag
    contained a, now corrected, false synchronisation. The bit should
    only be clear if the tag does not contain any false synchronisations.
-   
+
    Do bear in mind, that if a compression scheme is used by the encoder,
    the unsyncronisation scheme should be applied *afterwards*. When
    decoding a compressed, 'unsyncronised' file, the 'unsyncronisation
@@ -1395,23 +1455,23 @@ Abstract
    [JFIF] JPEG File Interchange Format, version 1.02
 
       <url:http://www.w3.org/Graphics/JPEG/jfif.txt>
-      
+
    [MIME] Freed, N.  and N. Borenstein,  "Multipurpose Internet Mail
    Extensions (MIME) Part One: Format of Internet Message Bodies",
    RFC 2045, November 1996.
- 
+
       <url:ftp://ftp.isi.edu/in-notes/rfc2045.txt>
-      
+
    [MPEG] ISO/IEC 11172-3:1993.
    Coding of moving pictures and associated audio for digital storage
    media at up to about 1,5 Mbit/s, Part 3: Audio.
    Technical committee / subcommittee: JTC 1 / SC 29
-   and   
+   and
    ISO/IEC 13818-3:1995
    Generic coding of moving pictures and associated audio information,
    Part 3: Audio.
    Technical committee / subcommittee: JTC 1 / SC 29
-   and   
+   and
    ISO/IEC DIS 13818-3
    Generic coding of moving pictures and associated audio information,
    Part 3: Audio (Revision of ISO/IEC 13818-3:1995)
@@ -1500,7 +1560,7 @@ A.2.   ID3v1 Implementation
 
 A.3.   Genre List
 
-   The following genres is defined in ID3v1 
+   The following genres is defined in ID3v1
 
       0.Blues
       1.Classic Rock
@@ -1582,9 +1642,9 @@ A.3.   Genre List
      77.Musical
      78.Rock & Roll
      79.Hard Rock
-     
+
    The following genres are Winamp extensions
-     
+
      80.Folk
      81.Folk-Rock
      82.National Folk
@@ -1647,14 +1707,14 @@ A.4.   Track addition - ID3v1.1
 9.   Author's Address
 
    Martin Nilsson
-   Rydsv�gen 246 C. 30
-   S-584 34 Link�ping
+   Rydsv�gen 246 C. 30
+   S-584 34 Link�ping
    Sweden
 
    Email: nilsson@id3.org
 
    Co-authors:
 
-   Johan Sundstr�m   Email: johan@id3.org
+   Johan Sundstr�m   Email: johan@id3.org
 
 
