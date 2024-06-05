@@ -228,6 +228,13 @@ Abstract
 
 
 3.2.   ID3v2 frames overview //ID3v2帧概述
+id3v2.2.0的帧结构如下：
+/**
+ *   frame identifier                      $xx xx xx //3bytes
+ *   framesize                             $xx xx xx //3bytes
+ *   text encoding description             $00 or $01 //1byte, $00表示ISO-8859-1, $01表示ISO/IEC 10646-1:1993，UCS-2
+ *
+ */
 
    The headers of the frames are similar in their construction. They
    consist of one three character identifier (capital A-Z and 0-9) and
@@ -270,21 +277,32 @@ Abstract
    text encoding description byte directly after the frame size. If
    ISO-8859-1 is used this byte should be $00, if unicode is used it
    should be $01.
+   如果没有其他说明，字符串将表示为范围在 $20 - $FF 内的 ISO-8859-1 [ISO-8859-1] 字符。
+   所有 unicode 字符串 [UNICODE] 均使用 16 位 unicode 2.0（ISO/IEC 10646-1:1993，UCS-2）。
+   所有数字字符串始终编码为 ISO-8859-1。如果使用 ISO-8859-1 编码，终止字符串将以 $00 终止；
+   如果使用 unicode 编码，则以 $00 00 终止。如果没有其他说明，则禁止使用换行符。在 ISO-8859-1 中，
+   如果允许使用换行符，则仅使用 $0A 表示。允许不同类型文本编码的帧在帧大小后直接有一个文本编码描述字节。
+   如果使用 ISO-8859-1，则该字节应为 $00；如果使用 unicode，则应为 $01。
 
    The three byte language field is used to describe the language of the
    frame's content, according to ISO-639-2 [ISO-639-2].
+   三个字节的语言字段用于描述帧内容的语言，符合ISO-639-2 [ISO-639-2]。
 
    All URLs [URL] may be relative, e.g. "picture.png", "../doc.txt".
+   所有 URL [URL] 都可能是相对的，例如“picture.png”、“../doc.txt”。
 
    If a frame is longer than it should be, e.g. having more fields than
    specified in this document, that indicates that additions to the
    frame have been made in a later version of the ID3 standard. This
    is reflected by the revision number in the header of the tag.
+   如果帧的长度超过应有的长度，例如，字段数量超过本文档中指定的字段数量，则表明在 ID3
+   标准的更高版本中对该帧进行了添加。标签标头中的修订号反映了这一点。
 
 
-4.   Declared ID3v2 frames
+4.   Declared ID3v2 frames //声明的 ID3v2
 
    The following frames are declared in this draft.
+   本草案中声明了以下帧。
 
    4.19  BUF Recommended buffer size
 
