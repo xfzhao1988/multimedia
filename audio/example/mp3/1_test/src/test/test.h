@@ -19,7 +19,7 @@ typedef enum
     MPEG_VERSION_Reserved,
     MPEG_VERSION_2,
     MPEG_VERSION_1
-} mpeg_version;
+} mpeg_version_e;
 
 /**
  * Layer index:
@@ -36,7 +36,7 @@ typedef enum
     MPEG_LAYER_III,
     MPEG_LAYER_II,
     MPEG_LAYER_I
-} mpeg_layers;
+} mpeg_layers_e;
 
 /**
  * The number of samples per MPEG audio frame as follows:
@@ -52,10 +52,10 @@ typedef enum
     MPEG_SAMPLES_PER_FRAME_384 = 384,
     MPEG_SAMPLES_PER_FRAME_576 = 576,
     MPEG_SAMPLES_PER_FRAME_1152 = 1152
-} mpeg_samples_per_frame;
+} mpeg_samples_per_frame_e;
 
 /**
- * mp3 biterate define.
+ * mpeg biterate define.
  *
  * The bitrates are always displayed in kilobits per second.
  * Note that the prefix kilo (abbreviated with the small 'k')
@@ -68,54 +68,54 @@ typedef enum
 */
 typedef enum
 {
-MP3_BITRATE_FALSE = -1,
-MP3_BITRATE_NONE = 0,
-MP3_BITRATE_8K   = 8000,
-MP3_BITRATE_16K  = 16000,
-MP3_BITRATE_24K  = 24000,
-MP3_BITRATE_32K  = 32000,
-MP3_BITRATE_40K  = 40000,
-MP3_BITRATE_48K  = 48000,
-MP3_BITRATE_56K  = 56000,
-MP3_BITRATE_64K  = 64000,
-MP3_BITRATE_80K  = 80000,
-MP3_BITRATE_96K  = 96000,
-MP3_BITRATE_112K = 112000,
-MP3_BITRATE_128K = 128000,
-MP3_BITRATE_144K = 144000,
-MP3_BITRATE_160K = 160000,
-MP3_BITRATE_176K = 176000,
-MP3_BITRATE_192K = 192000,
-MP3_BITRATE_224K = 224000,
-MP3_BITRATE_256K = 256000,
-MP3_BITRATE_288K = 288000,
-MP3_BITRATE_320K = 320000,
-MP3_BITRATE_352K = 352000,
-MP3_BITRATE_384K = 384000,
-MP3_BITRATE_416K = 416000,
-MP3_BITRATE_448K = 448000
-} mp3_bitrates;
+MPEG_BITRATE_FALSE = -1,
+MPEG_BITRATE_NONE = 0,
+MPEG_BITRATE_8K   = 8000,
+MPEG_BITRATE_16K  = 16000,
+MPEG_BITRATE_24K  = 24000,
+MPEG_BITRATE_32K  = 32000,
+MPEG_BITRATE_40K  = 40000,
+MPEG_BITRATE_48K  = 48000,
+MPEG_BITRATE_56K  = 56000,
+MPEG_BITRATE_64K  = 64000,
+MPEG_BITRATE_80K  = 80000,
+MPEG_BITRATE_96K  = 96000,
+MPEG_BITRATE_112K = 112000,
+MPEG_BITRATE_128K = 128000,
+MPEG_BITRATE_144K = 144000,
+MPEG_BITRATE_160K = 160000,
+MPEG_BITRATE_176K = 176000,
+MPEG_BITRATE_192K = 192000,
+MPEG_BITRATE_224K = 224000,
+MPEG_BITRATE_256K = 256000,
+MPEG_BITRATE_288K = 288000,
+MPEG_BITRATE_320K = 320000,
+MPEG_BITRATE_352K = 352000,
+MPEG_BITRATE_384K = 384000,
+MPEG_BITRATE_416K = 416000,
+MPEG_BITRATE_448K = 448000
+} mpeg_bitrates_e;
 
 /**
- * mp3 sampling rate define.
+ * mpeg sampling rate define.
  *
  * The sampling rate specifies how many samples per second are recorded.
  * Each MPEG version can handle different sampling rates.
 */
 typedef enum
 {
-    MP3_FREQUENCIES_FALSE = -1,
-    MP3_FREQUENCIES_Reserved = 0,
-    MP3_FREQUENCIES_8000HZ = 8000,
-    MP3_FREQUENCIES_11025HZ = 11025,
-    MP3_FREQUENCIES_12000HZ = 12000,
-    MP3_FREQUENCIES_16000HZ = 16000,
-    MP3_FREQUENCIES_22050HZ = 22050,
-    MP3_FREQUENCIES_24000HZ = 24000,
-    MP3_FREQUENCIES_32000HZ = 32000,
-    MP3_FREQUENCIES_48000HZ = 48000,
-    MP3_FREQUENCIES_44100HZ = 44100,
-} mp3_frequencies;
+    MPEG_FREQUENCIES_FALSE = -1,
+    MPEG_FREQUENCIES_Reserved = 0,
+    MPEG_FREQUENCIES_8000HZ = 8000,
+    MPEG_FREQUENCIES_11025HZ = 11025,
+    MPEG_FREQUENCIES_12000HZ = 12000,
+    MPEG_FREQUENCIES_16000HZ = 16000,
+    MPEG_FREQUENCIES_22050HZ = 22050,
+    MPEG_FREQUENCIES_24000HZ = 24000,
+    MPEG_FREQUENCIES_32000HZ = 32000,
+    MPEG_FREQUENCIES_48000HZ = 48000,
+    MPEG_FREQUENCIES_44100HZ = 44100,
+} mpeg_frequencies_e;
 
 /**
  * Channel mode
@@ -130,24 +130,24 @@ typedef enum
 */
 typedef enum
 {
-  MP3_CHANNEL_MODE_FALSE = -1,
-  MP3_CHANNEL_MODE_STEREO,
-  MP3_CHANNEL_MODE_JOINT_STEREO,
-  MP3_CHANNEL_MODE_DUAL_CHANNEL,
-  MP3_CHANNEL_MODE_SINGLE_CHANNEL
-} mp3_channel_mode;
+  MPEG_CHANNEL_MODE_FALSE = -1,
+  MPEG_CHANNEL_MODE_STEREO,
+  MPEG_CHANNEL_MODE_JOINT_STEREO,
+  MPEG_CHANNEL_MODE_DUAL_CHANNEL,
+  MPEG_CHANNEL_MODE_SINGLE_CHANNEL
+} mpeg_channel_mode_e;
 
 /**
  * Mode extension (Only used in Joint Stereo)
 */
 typedef enum
 {
-  MP3_MODE_EXT_FALSE = -1,
-  MP3_MODE_EXT_0,
-  MP3_MODE_EXT_1,
-  MP3_MODE_EXT_2,
-  MP3_MODE_EXT_3
-} mp3_mode_extension;
+  MPEG_MODE_EXT_FALSE = -1,
+  MPEG_MODE_EXT_0,
+  MPEG_MODE_EXT_1,
+  MPEG_MODE_EXT_2,
+  MPEG_MODE_EXT_3
+} mpeg_mode_extension_e;
 
 /**
  * Emphasis
@@ -162,12 +162,12 @@ typedef enum
 */
 typedef enum
 {
-  MP3_EMPHASIS_FALSE = -1,
-  MP3_EMPHASIS_NONE,
-  MP3_EMPHASIS_50_15MS,
-  MP3_EMPHASIS_Reserved,
-  MP3_EMPHASIS_CCIT_J17
-} mp3_emphasis;
+  MPEG_EMPHASIS_FALSE = -1,
+  MPEG_EMPHASIS_NONE,
+  MPEG_EMPHASIS_50_15MS,
+  MPEG_EMPHASIS_Reserved,
+  MPEG_EMPHASIS_CCIT_J17
+} mpeg_emphasis_e;
 
 /**
  * Protection bit
@@ -176,28 +176,43 @@ typedef enum
 */
 typedef enum
 {
-  MP3_CRC_ERROR_SIZE = -2,
-  MP3_CRC_MISMATCH = -1,
-  MP3_CRC_NONE = 0,
-  MP3_CRC_OK = 1
-} mp3_crc;
+  MPEG_CRC_ERROR_SIZE = -2,
+  MPEG_CRC_MISMATCH = -1,
+  MPEG_CRC_NONE = 0,
+  MPEG_CRC_OK = 1
+} mpeg_crc_e;
 
+typedef struct _id3v1_tag_info
+{
+    uint32_t size;
+} id3v1_tag_info_t;
+
+typedef struct _id3v2_tag_info
+{
+    uint32_t size;
+} id3v2_tag_info_t;
+
+typedef struct _id3_tag_info
+{
+    id3v1_tag_info_t id3v1;
+    id3v2_tag_info_t id3v2;
+} id3_tag_info_t;
 
 /**
- * mp3 audio frame header structure define.
+ * mpeg audio frame header structure define.
 */
-typedef struct
+typedef struct _mpeg_audio_frame_header_info
 {
     /**
      * 如下字段来自mpeg音频帧头的parse
     */
-    mpeg_version version; // 版本号
-    mpeg_layers layer; // 层
-    mp3_bitrates bitrate; // 比特率
-    mp3_channel_mode channelmode; // 通道模式
-    mp3_mode_extension modeext; // Mode extension (Only used in Joint Stereo)
-    mp3_emphasis emphasis; // Emphasis
-    mp3_crc crc; // Protection bit, MP3_CRC_OK：需要crc校验，MP3_CRC_NONE：无需crc校验
+    mpeg_version_e version; // 版本号
+    mpeg_layers_e layer; // 层
+    mpeg_bitrates_e bitrate; // 比特率
+    mpeg_channel_mode_e channelmode; // 通道模式
+    mpeg_mode_extension_e modeext; // Mode extension (Only used in Joint Stereo)
+    mpeg_emphasis_e emphasis; // Emphasis
+    mpeg_crc_e crc; // Protection bit, MPEG_CRC_OK：需要crc校验，MPEG_CRC_NONE：无需crc校验
     uint32_t frequency; // 采样频率
     bool privatebit; // Private bit (only informative)
     bool copyrighted; // Copyright bit (only informative)
@@ -209,31 +224,20 @@ typedef struct
     uint32_t frame_length; //该帧包含的字节数
     uint32_t samples_per_frame; //该帧包含的采样点数
 
-    uint32_t frame_pos; // start of first frame in this "chain" of headers
-    uint32_t next_frame_pos; // here we expect the next header with same parameters
+    uint32_t frame_count; //总共包含多少帧数据
+    struct _mpeg_audio_frame_header_info *next; //指向下一帧的指针
 
-} mp3_audio_frame_header_info;
+    //uint32_t frame_pos; // start of first frame in this "chain" of headers
+    //uint32_t next_frame_pos; // here we expect the next header with same parameters
 
-/*
-//! Used to describe a potential (chain of) MP3 headers we found
-typedef struct mp3_hdr {
-  off_t frame_pos; // start of first frame in this "chain" of headers
-  off_t next_frame_pos; // here we expect the next header with same parameters
-  int mp3_chans;
-  int mp3_freq;
-  int mpa_spf;
-  int mpa_layer;
-  int mpa_br;
-  int cons_hdrs; // if this reaches MIN_MP3_HDRS we accept as MP3 file
-  struct mp3_hdr *next;
-} mp3_hdr_t;
-*/
+} mpeg_audio_frame_header_info_t;
 
-/**
- * parse mp3 audio frame header function.
-*/
-bool mp3_audio_frame_header_parse(mp3_audio_frame_header_info* out_info,
-                                  const uint8_t* buffer,
-                                  uint32_t size);
+typedef struct mpeg_audio_info
+{
+    char* name;
+    bool is_valid_mpeg_audio;
+    id3_tag_info_t id3;
+    mpeg_audio_frame_header_info_t* audio_header;
+} mpeg_audio_info_t;
 
 #endif /* _TEST_H_ */

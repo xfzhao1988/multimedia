@@ -1,4 +1,4 @@
-SHELL := /bin/bash 
+SHELL := /bin/bash
 
 #ROOT = $(word 1,$(subst /1_test,/1_test ,$(shell pwd)))
 
@@ -14,7 +14,8 @@ target = zxf
 $(target): $(objects)
 	$(CC) -o $@ $^ $(LIBFLAGS) -ldbg -lcJson; \
 	cp $(target) $(BIN_PATH); \
-	cp $(headers) $(HEADER_PATH)
+	cp $(headers) $(HEADER_PATH); \
+	$(RM) $(target) $(objects) $(depens)
 
 %.o:%.c
 	$(CC) -o $@ -c $< $(CCFLAGS)
