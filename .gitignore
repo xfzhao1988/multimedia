@@ -10,4 +10,4 @@ audio/oss/mp3/build/*
 audio/oss/mp3/taglib-2.0.1/build/*
 audio/oss/mp3/taglib-2.0.1/install/*
 #ignore audio/example folder
-audio/example/*
+audio/example/mp3/1_test/media
