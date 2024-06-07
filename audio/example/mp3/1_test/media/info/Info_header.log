@@ -1,0 +1,398 @@
+<func:_skip_id3_tag, line:253>: id3v1: 0, id3v2: 0000002c
+<func:_mpeg_dec_parse_file, line:572>: offset:  0000002c, ff fb 40 c0
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 1
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 56000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 0
+Frame_length: 91 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  000000b3, ff ff 0 0
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 2
+
+Version: Mpeg 1
+Layer: 1
+Bitrate: 0
+Channelmode: Stereo
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 0
+Frame_length: 0 bytes
+Samples_per_frame: 384
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  000000e2, ff fb 50 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 3
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 104 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  000001b2, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 4
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000283, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 5
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000354, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 6
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000425, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 7
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  000004f6, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 8
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  000005c7, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 9
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000698, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 10
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000769, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 11
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  0000083a, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 12
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  0000090b, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 13
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  000009dc, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 14
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000aad, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 15
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000b7e, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 16
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000c4f, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 17
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000d20, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 18
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000df1, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 19
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000e3b, ff f6 55 ff
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 20
+
+Version: Mpeg 2
+Layer: 1
+Bitrate: 80000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 3
+Crc: 1
+Frequency: 24000Hz
+Privatebit: 1
+Copyrighted: 1
+Original: 1
+Frame_length: 160 bytes
+Samples_per_frame: 3359817
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000e8d, ff fd 35 55
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 21
+
+Version: Mpeg 1
+Layer: 2
+Bitrate: 56000
+Channelmode: Joint Stereo
+Modeext: 1
+Emphasis: 1
+Crc: 0
+Frequency: 48000Hz
+Privatebit: 1
+Copyrighted: 0
+Original: 1
+Frame_length: 168 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:572>: offset:  00000ec2, ff fb 52 c4
+<func:_mpeg_audio_header_parse, line:480>: _mpeg_audio_header_parse ok
+<func:_mpeg_dec_parse_file, line:579>: _mpeg_audio_header_parse success, 22
+
+Version: Mpeg 1
+Layer: 3
+Bitrate: 64000
+Channelmode: Mono
+Modeext: -1
+Emphasis: 0
+Crc: 0
+Frequency: 44100Hz
+Privatebit: 0
+Copyrighted: 0
+Original: 1
+Frame_length: 105 bytes
+Samples_per_frame: 1152
+
+<func:_mpeg_dec_parse_file, line:593>: founded: 0, success_parsed: 0
