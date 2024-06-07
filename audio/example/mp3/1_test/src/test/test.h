@@ -208,15 +208,16 @@ typedef struct _mpeg_audio_frame_header_info
     */
     mpeg_version_e version; // 版本号
     mpeg_layers_e layer; // 层
+    mpeg_crc_e crc; // Protection bit, MPEG_CRC_OK：需要crc校验，MPEG_CRC_NONE：无需crc校验
     mpeg_bitrates_e bitrate; // 比特率
+    uint32_t frequency; // 采样频率
+    bool paddingbit; // 填充位
+    bool privatebit; // Private bit (only informative)
     mpeg_channel_mode_e channelmode; // 通道模式
     mpeg_mode_extension_e modeext; // Mode extension (Only used in Joint Stereo)
-    mpeg_emphasis_e emphasis; // Emphasis
-    mpeg_crc_e crc; // Protection bit, MPEG_CRC_OK：需要crc校验，MPEG_CRC_NONE：无需crc校验
-    uint32_t frequency; // 采样频率
-    bool privatebit; // Private bit (only informative)
     bool copyrighted; // Copyright bit (only informative)
     bool original; // Original bit (only informative)
+    mpeg_emphasis_e emphasis; // Emphasis
 
     /**
      * 如下字段可通过mpeg音频帧头parse的结果计算得到

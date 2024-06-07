@@ -16,6 +16,9 @@
 #define ID3V2_TAG_HEADER_SIZE 10
 #define ID3V2_TAG_ID "ID3"
 #define MPEG_AUDIO_FRAME_HEADER_SIZE 4
+#define HDR_GET_LAYER(h)            (((h[1]) >> 1) & 3)
+#define HDR_GET_BITRATE(h)          ((h[2]) >> 4)
+#define HDR_GET_SAMPLE_RATE(h)      (((h[2]) >> 2) & 3)
 
 // http://www.mp3-tech.org/programmer/frame_header.html
 typedef struct
@@ -242,7 +245,6 @@ static void _skip_id3_tag(const uint8_t **pbuf, uint32_t *pbuf_size, mpeg_audio_
     uint32_t id3v1size = _get_id3v1_tagsize(buf, buf_size);
     if (id3v1size)
     {
-        buf      += id3v1size;
         buf_size -= id3v1size;
         info->id3.id3v1.size = id3v1size;
     }
@@ -286,13 +288,14 @@ static void _mpeg_audio_frame_header_print(mpeg_audio_frame_header_info_t* info)
                                 "Stereo" : (info->channelmode == MPEG_CHANNEL_MODE_JOINT_STEREO ?
                                 "Joint Stereo" : (info->channelmode == MPEG_CHANNEL_MODE_DUAL_CHANNEL ?
                                 "Dual Channel" : "Mono")));
-    //printf("Modeext: %d\n", info->modeext);
-    //printf("Emphasis: %d\n", info->emphasis);
-    //printf("Crc: %d\n", info->crc);
+    printf("Modeext: %d\n", info->modeext);
+    printf("Emphasis: %d\n", info->emphasis);
+    printf("Crc: %d\n", info->crc);
     printf("Frequency: %dHz\n", info->frequency);
-    //printf("Privatebit: %d\n", info->privatebit);
-    //printf("Copyrighted: %d\n", info->copyrighted);
-    //printf("Original: %d\n", info->original);
+    printf("Paddingbit: %d\n", info->paddingbit);
+    printf("Privatebit: %d\n", info->privatebit);
+    printf("Copyrighted: %d\n", info->copyrighted);
+    printf("Original: %d\n", info->original);
     printf("Frame_length: %d bytes\n", info->frame_length);
     printf("Samples_per_frame: %d\n", info->samples_per_frame);
     printf("\n");
@@ -363,6 +366,7 @@ static bool _mpeg_audio_header_parse(_mpeg_header_internal_t* header,
         return false;
     }
 
+    out_info->paddingbit = (bool)header->padding_bit;
     out_info->privatebit = (bool)header->private_bit;
     out_info->copyrighted = (bool)header->copyright;
     out_info->original = (bool)header->original;
@@ -515,6 +519,15 @@ static void _mpeg_dec_close_file(_mpeg_dec_map_t *map_info)
     map_info->size   = 0;
 }
 
+static bool _mpeg_dec_hdr_valid(const uint8_t *h)
+{
+    return ((h[0] & 0xFF) == 0xFF) &&
+           ((h[1] & 0xE0) == 0xE0) &&
+           (HDR_GET_LAYER(h) != 0) &&
+           (HDR_GET_BITRATE(h) != 15) &&
+           (HDR_GET_SAMPLE_RATE(h) != 3);
+}
+
 static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* map)
 {
     if(!info || !map)
@@ -542,9 +555,11 @@ static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* ma
     _mpeg_header_internal_t* _tmp_header = NULL;
     mpeg_audio_frame_header_info_t tmp_header = {0};
 
+    DBG_INFO("offset:  %08x, %x %x %x %x\n", info->id3.id3v2.size, pbuff[0], pbuff[1], pbuff[2], pbuff[3]);
+
     for(int i = 0; i + MPEG_AUDIO_FRAME_HEADER_SIZE <= size; ++i)
     {
-        if (((pbuff[i] & 0xFF) != 0xFF) || ((pbuff[i + 1] & 0xE0) != 0xE0)) //first 11 bits should be 1
+        if(!_mpeg_dec_hdr_valid(pbuff + i))
         {
             continue;
         }
@@ -553,7 +568,7 @@ static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* ma
         _tmp_header = (_mpeg_header_internal_t*)(void*)(pbuff + i);
         _mpeg_dec_reset_audio_header(&tmp_header);
 
-        DBG_INFO("%x %x %x %x\n", pbuff[i], pbuff[i+1], pbuff[i+2], pbuff[i+3]);
+        DBG_INFO("offset:  %08x, %x %x %x %x\n", i + info->id3.id3v2.size, pbuff[i], pbuff[i+1], pbuff[i+2], pbuff[i+3]);
 
         success_parsed = _mpeg_audio_header_parse(_tmp_header, &tmp_header);
         if(success_parsed)
@@ -562,7 +577,7 @@ static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* ma
             success_parsed = true;
             DBG_INFO("_mpeg_audio_header_parse success, %d\n", success_count);
             _mpeg_audio_frame_header_print(&tmp_header);
-            i += tmp_header.frame_length;
+            i += tmp_header.frame_length - 4;
         }
         else
         {
@@ -574,7 +589,7 @@ static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* ma
         success_parsed = false;
     }
 
-    DBG_INFO("founded: %d, success_parsed: %d\n", founded, success_parsed);
+    DBG_INFO("success_count: %d, fail_count: %d\n", success_count, fail_count);
 
     if(founded && success_parsed)
     {
