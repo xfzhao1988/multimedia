@@ -487,9 +487,9 @@ static bool _mpeg_audio_header_parse(_mpeg_header_internal_t* header,
 	else
 		b_lsf = true;
 
-    out_info->samples_per_frame = _mpeg_samples_per_frame[b_lsf][out_info->layer];
+    out_info->samples_per_frame = _mpeg_samples_per_frame[b_lsf][3-out_info->layer];
 
-    DBG_INFO("_mpeg_audio_header_parse ok\n");
+    DBG_INFO("_mpeg_audio_header_parse ok %d, %d\n", b_lsf, out_info->layer);
 
     return true;
 }
@@ -581,6 +581,7 @@ static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* ma
 
     bool founded = false;
     bool success_parsed = false;
+    bool first_frame_parsed = false;
     uint32_t success_count = 0;
     uint32_t fail_count = 0;
     _mpeg_header_internal_t* _tmp_header = NULL;
@@ -629,20 +630,35 @@ static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* ma
             DBG_INFO("_mpeg_audio_header_parse success, %d\n", success_count);
             list_add_tail(&tmp_item->list, &info->header_list);
             info->count++;
-            i += tmp_header.frame_length - 4;
+            if(tmp_header.bitrate == MPEG_BITRATE_NONE)
+            {
+                //do nothing
+                DBG_INFO("offset:  %08x, %x %x %x %x\n", i + info->id3.id3v2.size, pbuff[i], pbuff[i+1], pbuff[i+2], pbuff[i+3]);
+            }
+            else
+            {
+                i += tmp_header.frame_length - 4;
+            }
         }
         else
         {
             fail_count++;
             DBG_ERROR("_mpeg_audio_header_parse fail, %d\n", fail_count);
         }
+
+        if(!first_frame_parsed)
+        {
+            first_frame_parsed = true;
+            //check and parse vbr header for "Xing"/"Info" or "VBRI"
+        }
     }
 
     DBG_INFO("success_count: %d, fail_count: %d\n", success_count, fail_count);
 
+    _mpeg_dec_audio_info_print(info);
+
     if(founded && success_parsed)
     {
-        _mpeg_dec_audio_info_print(info);
         return true;
     }
     else
