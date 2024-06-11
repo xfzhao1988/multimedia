@@ -12,7 +12,7 @@ all:
 	cd $$i && $(MAKE); \
 	done
 
-MAKE_CLEAN_RULE := $(SRC_PATH)/test $(SRC_PATH)/dbg $(SRC_PATH)/cJson
+MAKE_CLEAN_RULE := $(SRC_PATH)/test $(SRC_PATH)/dbg $(SRC_PATH)/util $(SRC_PATH)/cJson
 
 clean:
 	for i in $(MAKE_CLEAN_RULE);\

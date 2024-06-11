@@ -259,46 +259,57 @@ static void _mpeg_dec_reset_audio_header(mpeg_audio_frame_header_info_t* info)
 {
     info->version = MPEG_VERSION_FALSE;
     info->layer = MPEG_LAYER_FALSE;
+    info->crc = MPEG_CRC_MISMATCH;
     info->bitrate = MPEG_BITRATE_FALSE;
+    info->frequency = 0;
+    info->paddingbit = 0;
+    info->privatebit = 0;
     info->channelmode = MPEG_CHANNEL_MODE_FALSE;
     info->modeext = MPEG_MODE_EXT_FALSE;
+    info->copyrighted = 0;
+    info->original = 0;
     info->emphasis = MPEG_EMPHASIS_FALSE;
-    info->crc = MPEG_CRC_MISMATCH;
-    info->frequency = 0;
     info->frame_length = 0;
     info->samples_per_frame = 0;
-    info->frame_count = 0;
-    info->next = NULL;
-    //info->frames = 0;
-    //info->time = 0;
-    //info->vbr_bitrate = 0;
+    info->frame_pos = 0;
+    memset(&info->bytes, 0, 4);
+    INIT_LIST_HEAD(&info->list);
 }
 
-static void _mpeg_audio_frame_header_print(mpeg_audio_frame_header_info_t* info)
+static void _mpeg_dec_audio_info_print(mpeg_audio_info_t* info)
 {
-    printf("\n");
-    printf("Version: Mpeg %s\n", info->version == MPEG_VERSION_2_5 ?
-                                 "2.5": ((info->version == MPEG_VERSION_2)) ?
-                                 "2" : "1");
-    printf("Layer: %s\n", info->layer == MPEG_LAYER_I ?
-                          "1" : (info->layer == MPEG_LAYER_II) ?
-                          "2" : "3");
-    printf("Bitrate: %d\n", info->bitrate);
-    printf("Channelmode: %s\n", info->channelmode == MPEG_CHANNEL_MODE_STEREO ?
-                                "Stereo" : (info->channelmode == MPEG_CHANNEL_MODE_JOINT_STEREO ?
-                                "Joint Stereo" : (info->channelmode == MPEG_CHANNEL_MODE_DUAL_CHANNEL ?
-                                "Dual Channel" : "Mono")));
-    printf("Modeext: %d\n", info->modeext);
-    printf("Emphasis: %d\n", info->emphasis);
-    printf("Crc: %d\n", info->crc);
-    printf("Frequency: %dHz\n", info->frequency);
-    printf("Paddingbit: %d\n", info->paddingbit);
-    printf("Privatebit: %d\n", info->privatebit);
-    printf("Copyrighted: %d\n", info->copyrighted);
-    printf("Original: %d\n", info->original);
-    printf("Frame_length: %d bytes\n", info->frame_length);
-    printf("Samples_per_frame: %d\n", info->samples_per_frame);
-    printf("\n");
+    mpeg_audio_frame_header_info_t* pos = NULL;
+    int count = 0;
+    printf("name: %s has %d frames as follows: \n", info->name, info->count);
+
+    list_for_each_entry(pos, &info->header_list, list)
+    {
+        printf("frame %d: \n", ++count);
+        printf("Version: Mpeg %s\n", pos->version == MPEG_VERSION_2_5 ?
+                                    "2.5": ((pos->version == MPEG_VERSION_2)) ?
+                                    "2" : "1");
+        printf("Layer: %s\n", pos->layer == MPEG_LAYER_I ?
+                            "1" : (pos->layer == MPEG_LAYER_II) ?
+                            "2" : "3");
+        printf("Bitrate: %d\n", pos->bitrate);
+        printf("Channelmode: %s\n", pos->channelmode == MPEG_CHANNEL_MODE_STEREO ?
+                                    "Stereo" : (pos->channelmode == MPEG_CHANNEL_MODE_JOINT_STEREO ?
+                                    "Joint Stereo" : (pos->channelmode == MPEG_CHANNEL_MODE_DUAL_CHANNEL ?
+                                    "Dual Channel" : "Mono")));
+        printf("Modeext: %d\n", pos->modeext);
+        printf("Emphasis: %d\n", pos->emphasis);
+        printf("Crc: %d\n", pos->crc);
+        printf("Frequency: %dHz\n", pos->frequency);
+        printf("Paddingbit: %d\n", pos->paddingbit);
+        printf("Privatebit: %d\n", pos->privatebit);
+        printf("Copyrighted: %d\n", pos->copyrighted);
+        printf("Original: %d\n", pos->original);
+        printf("Frame_length: %d bytes\n", pos->frame_length);
+        printf("Samples_per_frame: %d\n", pos->samples_per_frame);
+        printf("frame_pos: %08x\n", pos->frame_pos);
+        printf("bytes: %x %x %x %x\n", pos->bytes[0], pos->bytes[1], pos->bytes[2], pos->bytes[3]);
+        printf("\n");
+    }
 }
 
 static bool _mpeg_audio_header_parse(_mpeg_header_internal_t* header,
@@ -528,6 +539,26 @@ static bool _mpeg_dec_hdr_valid(const uint8_t *h)
            (HDR_GET_SAMPLE_RATE(h) != 3);
 }
 
+static void _mpeg_dec_header_dup(mpeg_audio_frame_header_info_t* dest, mpeg_audio_frame_header_info_t* src)
+{
+    dest->version = src->version;
+    dest->layer = src->layer;
+    dest->crc = src->crc;
+    dest->bitrate = src->bitrate;
+    dest->frequency = src->frequency;
+    dest->paddingbit = src->paddingbit;
+    dest->privatebit = src->privatebit;
+    dest->channelmode = src->channelmode;
+    dest->modeext = src->modeext;
+    dest->copyrighted = src->copyrighted;
+    dest->original = src->original;
+    dest->emphasis = src->emphasis;
+    dest->frame_length = src->frame_length;
+    dest->samples_per_frame = src->samples_per_frame;
+    dest->frame_pos = src->frame_pos;
+    memcpy(&dest->bytes, &src->bytes, 4);
+}
+
 static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* map)
 {
     if(!info || !map)
@@ -554,11 +585,17 @@ static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* ma
     uint32_t fail_count = 0;
     _mpeg_header_internal_t* _tmp_header = NULL;
     mpeg_audio_frame_header_info_t tmp_header = {0};
+    mpeg_audio_frame_header_info_t* tmp_item = NULL;
 
     DBG_INFO("offset:  %08x, %x %x %x %x\n", info->id3.id3v2.size, pbuff[0], pbuff[1], pbuff[2], pbuff[3]);
 
+    //parse mpeg audio headers
+    INIT_LIST_HEAD(&info->header_list);
     for(int i = 0; i + MPEG_AUDIO_FRAME_HEADER_SIZE <= size; ++i)
     {
+        founded = false;
+        success_parsed = false;
+
         if(!_mpeg_dec_hdr_valid(pbuff + i))
         {
             continue;
@@ -566,6 +603,7 @@ static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* ma
 
         founded = true;
         _tmp_header = (_mpeg_header_internal_t*)(void*)(pbuff + i);
+
         _mpeg_dec_reset_audio_header(&tmp_header);
 
         DBG_INFO("offset:  %08x, %x %x %x %x\n", i + info->id3.id3v2.size, pbuff[i], pbuff[i+1], pbuff[i+2], pbuff[i+3]);
@@ -573,10 +611,24 @@ static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* ma
         success_parsed = _mpeg_audio_header_parse(_tmp_header, &tmp_header);
         if(success_parsed)
         {
+            tmp_header.frame_pos = i + info->id3.id3v2.size;
+            memcpy(&tmp_header.bytes, pbuff + i, 4);
+
+            tmp_item = (mpeg_audio_frame_header_info_t*)malloc(sizeof(mpeg_audio_frame_header_info_t));
+            if(NULL == tmp_item)
+            {
+                DBG_ERROR("malloc tmp_item fail\n");
+                return -1;
+            }
+
+            _mpeg_dec_reset_audio_header(tmp_item);
+            _mpeg_dec_header_dup(tmp_item, &tmp_header);
+
             success_count++;
             success_parsed = true;
             DBG_INFO("_mpeg_audio_header_parse success, %d\n", success_count);
-            _mpeg_audio_frame_header_print(&tmp_header);
+            list_add_tail(&tmp_item->list, &info->header_list);
+            info->count++;
             i += tmp_header.frame_length - 4;
         }
         else
@@ -584,15 +636,13 @@ static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* ma
             fail_count++;
             DBG_ERROR("_mpeg_audio_header_parse fail, %d\n", fail_count);
         }
-
-        founded = false;
-        success_parsed = false;
     }
 
     DBG_INFO("success_count: %d, fail_count: %d\n", success_count, fail_count);
 
     if(founded && success_parsed)
     {
+        _mpeg_dec_audio_info_print(info);
         return true;
     }
     else
@@ -603,6 +653,7 @@ static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* ma
 
 static void _mpeg_dec_free_audio_info(mpeg_audio_info_t* info)
 {
+
     if(info)
     {
         if(info->name)
@@ -611,7 +662,21 @@ static void _mpeg_dec_free_audio_info(mpeg_audio_info_t* info)
             info->name = NULL;
         }
 
+        if(!list_empty(&info->header_list))
+        {
+            mpeg_audio_frame_header_info_t* pos = NULL;
+            mpeg_audio_frame_header_info_t* n = NULL;
+
+            DBG_ERROR("\n");
+
+            list_for_each_entry_safe(pos, n, &info->header_list, list)
+            {
+                list_del(&pos->list);
+                free(pos);
+            }
+        }
     }
+
 }
 
 int main(int argc, char *argv[])

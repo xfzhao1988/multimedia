@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "list.h"
+
+
+#define MPEG_AUDIO_FRAME_HEADER_LEN 4
 
 /**
  * Audio version ID
@@ -225,11 +229,10 @@ typedef struct _mpeg_audio_frame_header_info
     uint32_t frame_length; //该帧包含的字节数
     uint32_t samples_per_frame; //该帧包含的采样点数
 
-    uint32_t frame_count; //总共包含多少帧数据
-    struct _mpeg_audio_frame_header_info *next; //指向下一帧的指针
+    uint32_t frame_pos; // start of first frame in this "chain" of headers
+    uint8_t bytes[MPEG_AUDIO_FRAME_HEADER_LEN];
 
-    //uint32_t frame_pos; // start of first frame in this "chain" of headers
-    //uint32_t next_frame_pos; // here we expect the next header with same parameters
+    struct list_head list;
 
 } mpeg_audio_frame_header_info_t;
 
@@ -238,7 +241,8 @@ typedef struct mpeg_audio_info
     char* name;
     bool is_valid_mpeg_audio;
     id3_tag_info_t id3;
-    mpeg_audio_frame_header_info_t* audio_header;
+    struct list_head header_list;
+    uint32_t count; //总共包含多少帧数据
 } mpeg_audio_info_t;
 
 #endif /* _TEST_H_ */
