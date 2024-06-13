@@ -7,5 +7,5 @@ HEADER_PATH = $(ROOT)/include/
 LIB_PATH = $(ROOT)/lib/
 BIN_PATH = $(ROOT)/bin/
 SRC_PATH = $(ROOT)/src
-CCFLAGS = -I$(HEADER_PATH) -Wall -Werror -Wno-error=restrict
+CCFLAGS = -I$(HEADER_PATH) -Wall -Werror -Wno-error=restrict -g
 LIBFLAGS = -L$(LIB_PATH)

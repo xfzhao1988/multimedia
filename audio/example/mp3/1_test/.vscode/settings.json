@@ -3,6 +3,7 @@
         "stdio.h": "c",
         "inet.h": "c",
         "dbg.h": "c",
-        "random": "c"
+        "random": "c",
+        "minimp3_ex.h": "c"
     }
 }

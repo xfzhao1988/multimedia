@@ -8,6 +8,7 @@
 
 #define MPEG_AUDIO_FRAME_HEADER_LEN 4
 
+
 /**
  * Audio version ID
  *
@@ -242,7 +243,9 @@ typedef struct mpeg_audio_info
     bool is_valid_mpeg_audio;
     id3_tag_info_t id3;
     struct list_head header_list;
-    uint32_t count; //总共包含多少帧数据
+    uint32_t total_frames;
+    uint32_t total_file_size;
+
 } mpeg_audio_info_t;
 
 #endif /* _TEST_H_ */

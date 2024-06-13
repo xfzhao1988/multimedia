@@ -13,6 +13,8 @@
 #include "dbg.h"
 #include "test.h"
 
+
+#if 1
 #define ID3V2_TAG_HEADER_SIZE 10
 #define ID3V2_TAG_ID "ID3"
 #define MPEG_AUDIO_FRAME_HEADER_SIZE 4
@@ -280,7 +282,7 @@ static void _mpeg_dec_audio_info_print(mpeg_audio_info_t* info)
 {
     mpeg_audio_frame_header_info_t* pos = NULL;
     int count = 0;
-    printf("name: %s has %d frames as follows: \n", info->name, info->count);
+    printf("name: %s has %d frames as follows: \n", info->name, info->total_frames);
 
     list_for_each_entry(pos, &info->header_list, list)
     {
@@ -629,15 +631,15 @@ static int32_t _mpeg_dec_parse_file(mpeg_audio_info_t* info, _mpeg_dec_map_t* ma
             success_parsed = true;
             DBG_INFO("_mpeg_audio_header_parse success, %d\n", success_count);
             list_add_tail(&tmp_item->list, &info->header_list);
-            info->count++;
+            info->total_frames++;
             if(tmp_header.bitrate == MPEG_BITRATE_NONE)
             {
                 //do nothing
-                DBG_INFO("offset:  %08x, %x %x %x %x\n", i + info->id3.id3v2.size, pbuff[i], pbuff[i+1], pbuff[i+2], pbuff[i+3]);
+                DBG_INFO("invalid :  %08x, %x %x %x %x\n", i + info->id3.id3v2.size, pbuff[i], pbuff[i+1], pbuff[i+2], pbuff[i+3]);
             }
             else
             {
-                i += tmp_header.frame_length - 4;
+                i += tmp_header.frame_length - 1;
             }
         }
         else
@@ -742,3 +744,37 @@ int main(int argc, char *argv[])
 
     return ret;
 }
+#endif
+
+#if 0
+#include "minimp3_ex.h"
+#include "decode.h"
+
+static decoder dec = {0};
+
+int main(int argc, char* argv[])
+{
+    open_dec(&dec, argv[1]);
+
+/*
+    mp3d_sample_t buffer[4096] = {0};
+
+    size_t count = 0;
+    size_t sum = 0;
+
+    FILE* pcm = fopen("./output.pcm", "w");
+
+    while ((count = mp3dec_ex_read(&dec.mp3d, buffer, 4096)) != 0)
+    {
+        sum += count;
+        fwrite(buffer, 1, count, pcm);
+    }
+
+    DBG_INFO("sum: %ld, count: %ld\n", sum, count);
+
+    fclose(pcm);
+*/
+
+    return 0;
+}
+#endif
