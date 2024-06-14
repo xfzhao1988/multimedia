@@ -12,7 +12,7 @@ depens = $(objects:.o=.d)
 target = zxf
 
 $(target): $(objects)
-	$(CC) -o $@ $^ $(LIBFLAGS) -ldbg -lcJson; \
+	$(CC) -o $@ $^ $(LIBFLAGS) -ldbg -lcJson -lutil; \
 	cp $(target) $(BIN_PATH); \
 	cp $(headers) $(HEADER_PATH); \
 	$(RM) $(target) $(objects) $(depens)

@@ -14,7 +14,7 @@
 #include "test.h"
 
 
-#if 1
+#if 0
 #define ID3V2_TAG_HEADER_SIZE 10
 #define ID3V2_TAG_ID "ID3"
 #define MPEG_AUDIO_FRAME_HEADER_SIZE 4
@@ -778,3 +778,26 @@ int main(int argc, char* argv[])
     return 0;
 }
 #endif
+
+#include "bs.h"
+
+int main(int argc, char* argv[])
+{
+
+    uint8_t buffer[4096] = {0};
+    bs_t bs = {0};
+
+    FILE* input = fopen(argv[1], "rb");
+
+    size_t count = fread(buffer, 1, 4096, input);
+    fclose(input);
+
+    bs_init(&bs, buffer,  count);
+
+    skip_bits(&bs, 8);
+    uint64_t val = get_bits(&bs, 16);
+
+    DBG_INFO("%lx\n", val);
+
+    return 0;
+}

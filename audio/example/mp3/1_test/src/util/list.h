@@ -1,6 +1,10 @@
 #ifndef _LIST_H_
 #define _LIST_H_
 
+#if defined(__cplusplus) || defined(c_plusplus)
+}
+#endif
+
 #define NULL ((void *)0)
 #define LIST_POISON1  NULL
 #define LIST_POISON2  NULL
@@ -335,5 +339,9 @@ static inline int list_is_head(const struct list_head *list, const struct list_h
 		n = list_prev_entry(pos, member);			\
 	     !list_entry_is_head(pos, head, member); 			\
 	     pos = n, n = list_prev_entry(n, member))
+
+#if defined(__cplusplus) || defined(c_plusplus)
+}
+#endif
 
 #endif //end of _LIST_H_
