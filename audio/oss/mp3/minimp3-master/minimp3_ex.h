@@ -10,9 +10,15 @@
 #include "minimp3.h"
 
 /* flags for mp3dec_ex_open_* functions */
-#define MP3D_SEEK_TO_BYTE   0      /* mp3dec_ex_seek seeks to byte in stream */
-#define MP3D_SEEK_TO_SAMPLE 1      /* mp3dec_ex_seek precisely seeks to sample using index (created during duration calculation scan or when mp3dec_ex_seek called) */
-#define MP3D_DO_NOT_SCAN    2      /* do not scan whole stream for duration if vbrtag not found, mp3dec_ex_t::samples will be filled only if mp3dec_ex_t::vbr_tag_found == 1 */
+#define MP3D_SEEK_TO_BYTE   0      /* mp3dec_ex_seek seeks to byte in stream
+                                    * mp3dec_ex_seek 在流中寻找字节
+                                    */
+#define MP3D_SEEK_TO_SAMPLE 1      /* mp3dec_ex_seek precisely seeks to sample using index (created during duration calculation scan or when mp3dec_ex_seek called)
+                                    * mp3dec_ex_seek 精确地利用索引进行跳转（在持续时间计算扫描期间或调用 mp3dec_ex_seek 时创建）
+                                    */
+#define MP3D_DO_NOT_SCAN    2      /* do not scan whole stream for duration if vbrtag not found, mp3dec_ex_t::samples will be filled only if mp3dec_ex_t::vbr_tag_found == 1
+                                    * 如果未找到 vbrtag，则不扫描整个流以计算持续时间，仅当 mp3dec_ex_t::vbr_tag_found == 1 时，才会填充 mp3dec_ex_t::samples
+                                    */
 #ifdef MINIMP3_ALLOW_MONO_STEREO_TRANSITION
 #define MP3D_ALLOW_MONO_STEREO_TRANSITION  4
 #define MP3D_FLAGS_MASK 7
@@ -32,9 +38,54 @@
 #define MP3D_E_PARAM   -1
 #define MP3D_E_MEMORY  -2
 #define MP3D_E_IOERROR -3
-#define MP3D_E_USER    -4  /* can be used to stop processing from callbacks without indicating specific error */
+#define MP3D_E_USER    -4  /* can be used to stop processing from callbacks without indicating specific error
+                            * 可用于停止回调处理而不指示特定错误
+                            */
 #define MP3D_E_DECODE  -5  /* decode error which can't be safely skipped, such as sample rate, layer and channels change */
 
+/**
+ * 这个结构体定义了MP3解码文件的信息，包括音频数据缓冲区、样本数量、声道数、采样率、
+ * 层级和平均比特率等。以下是对该结构体各个成员的详细解释：
+ *
+ * typedef struct
+ *   {
+ *      mp3d_sample_t *buffer; // 指向包含音频数据的缓冲区的指针。
+ *      size_t samples; // 样本数量，包括所有声道。字节大小为samples*sizeof(mp3d_sample_t)。
+ *      int channels; // 音频数据中的声道数。
+ *      int hz; // 音频数据的采样率（赫兹）。
+ *      int layer; // MP3层级（通常为1、2或3）。
+ *      int avg_bitrate_kbps; // 平均比特率（千位/秒）。
+ *  } mp3dec_file_info_t;
+ *
+ * 详细解释
+ * *mp3d_sample_t buffer:
+ * 用途：指向包含音频数据的缓冲区的指针。
+ * 音频数据缓冲区：这是一个指针，指向一个包含MP3解码后的音频数据的内存区域。
+ *
+ * size_t samples:
+ * 用途：样本数量，包括所有声道。
+ * 样本数量：表示解码后的音频数据中包含的样本数。注意，这个值包括所有声道的样本数。
+ *
+ * int channels:
+ * 用途：音频数据中的声道数。
+ * 声道数：表示音频数据中包含的声道数，如立体声音频则为2。
+ *
+ * int hz:
+ * 用途：音频数据的采样率，即每秒采集的样本数。
+ * 采样率：以赫兹为单位，表示每秒钟采集的音频样本数。
+ *
+ * int layer:
+ * 用途：MP3音频的层级，通常为1、2或3，分别对应MPEG-1、MPEG-2和MPEG-2.5。
+ * MP3层级：表示使用的MPEG音频层级，影响音频编码的参数和质量。
+ *
+ * int avg_bitrate_kbps:
+ * 用途：平均比特率，即音频数据的平均传输速率。
+ * 平均比特率：以千位/秒为单位，表示音频数据平均每秒传输的比特数。
+ *
+ * 这个结构体允许存储解码后的MP3音频文件的信息，包括音频数据缓冲区、采样数、声道数、采样率、MP3层级和平均比特率等参数。
+ *
+ *
+*/
 typedef struct
 {
     mp3d_sample_t *buffer;
@@ -42,18 +93,87 @@ typedef struct
     int channels, hz, layer, avg_bitrate_kbps;
 } mp3dec_file_info_t;
 
+/**
+ * 这是一个用于存储MP3解码器映射信息的结构体。通常在解码MP3音频流时，
+ * 可能需要将音频数据映射到内存中进行处理。以下是对该结构体各个成员的详细解释：
+ *
+ *  typedef struct
+ *  {
+ *      const uint8_t *buffer; // 指向包含音频数据的缓冲区的指针。
+ *      size_t size; // 缓冲区的大小（以字节为单位）。
+ *  } mp3dec_map_info_t;
+ * 详细解释
+ * const uint8_t buffer:
+ *
+ * 用途：指向包含音频数据的缓冲区的指针。
+ * 数据缓冲区：这是一个指针，指向包含待解码的MP3音频数据的内存区域。
+ *
+ * size_t size:
+ * 用途：缓冲区的大小（以字节为单位）。
+ * 缓冲区大小：这是缓冲区的大小，以字节为单位，表示待解码的音频数据的总大小。
+ *
+ * 这个结构体用于将MP3解码器所需的音频数据信息封装到一起，方便传递给解码器函数。
+ * 解码器可以通过访问buffer指向的内存区域来获取音频数据，并使用size指定的大小进行解码。
+ *
+*/
 typedef struct
 {
     const uint8_t *buffer;
     size_t size;
 } mp3dec_map_info_t;
 
+/**
+ * 这个结构体定义了MP3解码器中的音频帧信息，其中包括样本数量和偏移量。以下是对该结构体各个成员的详细解释：
+ *
+ *  typedef struct
+ *   {
+ *      uint64_t sample; // 音频帧中的样本数量。
+ *      uint64_t offset; // 音频帧在解码后的数据中的偏移量。
+ *  } mp3dec_frame_t;
+ *
+ * 详细解释
+ *
+ * uint64_t sample:
+ * 用途：表示音频帧中的样本数量。
+ * 样本数量：这是一个表示音频帧中包含了多少个音频样本的整数值。音频样本是在数字音频中使用的基本单位，通常表示音频波形的振幅值。
+ *
+ * uint64_t offset:
+ * 用途：表示音频帧在解码后的数据中的偏移量。
+ * 偏移量：这是一个表示音频帧在解码后的音频数据中的位置的整数值。它通常用于跟踪音频数据中不同帧的位置。
+ *
+ * 这个结构体允许MP3解码器将解码后的音频帧信息存储为一对样本数量和偏移量，以便在解码后的音频数据中定位和处理各个音频帧。
+*/
 typedef struct
 {
     uint64_t sample;
     uint64_t offset;
 } mp3dec_frame_t;
 
+/**
+ * 这个结构体定义了MP3解码器的索引信息，用于存储解码后的音频帧的相关信息。以下是对该结构体各个成员的详细解释：
+ *  typedef struct
+ *   {
+ *       mp3dec_frame_t *frames; // 指向解码后音频帧的数组的指针。
+ *       size_t num_frames; // 数组中实际存储的音频帧数量。
+ *      size_t capacity; // 数组的容量，即可存储的最大音频帧数量。
+ *  } mp3dec_index_t;
+ *
+ * 详细解释
+ * *mp3dec_frame_t frames:
+ * 用途：指向解码后音频帧的数组的指针。
+ * 音频帧数组：这是一个指针，指向一个包含解码后的音频帧信息的数组。每个音频帧可能包含音频数据、帧头信息等。
+ *
+ * size_t num_frames:
+ * 用途：数组中实际存储的音频帧数量。
+ * 音频帧数量：这是一个表示当前数组中存储了多少个音频帧的整数值。
+ *
+ * size_t capacity:
+ * 用途：数组的容量，即可存储的最大音频帧数量。
+ * 数组容量：这是一个表示数组的大小，即它可以容纳多少个音频帧的整数值。当数组需要动态增长时，此值可能会变化。
+ * 这个结构体允许MP3解码器将解码后的音频帧信息存储在一个数组中，并跟踪数组的大小和容量。
+ * 这样，用户可以方便地访问解码后的音频数据，并了解解码器当前处理的音频帧数量和存储能力。
+ *
+*/
 typedef struct
 {
     mp3dec_frame_t *frames;
@@ -63,6 +183,40 @@ typedef struct
 typedef size_t (*MP3D_READ_CB)(void *buf, size_t size, void *user_data);
 typedef int (*MP3D_SEEK_CB)(uint64_t position, void *user_data);
 
+/**
+ * 这个结构体定义了MP3解码器的I/O（输入/输出）回调函数。它允许解码器从外部源（如文件、网络流等）
+ * 读取音频数据，并在需要时进行跳转（seek）。以下是对该结构体各个成员的详细解释：
+ *  typedef struct
+ *  {
+ *      MP3D_READ_CB read; // 读取回调函数指针，用于从外部源读取音频数据。
+ *      void *read_data; // 读取回调函数的上下文数据，用于存储读取回调函数的状态信息。
+ *      MP3D_SEEK_CB seek; // 跳转回调函数指针，用于在音频数据中进行跳转。
+ *      void *seek_data; // 跳转回调函数的上下文数据，用于存储跳转回调函数的状态信息。
+ *  } mp3dec_io_t;
+ *
+ * 详细解释
+ *
+ * MP3D_READ_CB read:
+ * 用途：读取回调函数指针，用于从外部源读取音频数据。
+ * 回调函数：这是一个函数指针，指向一个用于从外部源读取音频数据的回调函数。解码器将使用此函数来获取音频数据。
+ *
+ * *void read_data:
+ * 用途：读取回调函数的上下文数据，用于存储读取回调函数的状态信息。
+ * 上下文数据：这个指针用于存储与读取回调函数相关的状态信息。通常情况下，它会传递给读取回调函数，
+ * 以便函数能够访问解码器所需的其他信息。
+ *
+ * MP3D_SEEK_CB seek:
+ * 用途：跳转回调函数指针，用于在音频数据中进行跳转。
+ * 回调函数：这是一个函数指针，指向一个用于在音频数据中进行跳转的回调函数。解码器将使用此函数来实现跳转功能。
+ *
+ * *void seek_data:
+ * 用途：跳转回调函数的上下文数据，用于存储跳转回调函数的状态信息。
+ * 上下文数据：这个指针用于存储与跳转回调函数相关的状态信息。通常情况下，它会传递给跳转回调函数，
+ * 以便函数能够访问解码器所需的其他信息。
+ *
+ * 这个结构体允许将自定义的读取和跳转函数与MP3解码器相关联，从而使解码器能够从各种不同的数据源中读取音频数据，
+ * 并实现音频数据的跳转功能。
+*/
 typedef struct
 {
     MP3D_READ_CB read;
@@ -133,7 +287,7 @@ int mp3dec_ex_open_w(mp3dec_ex_t *dec, const wchar_t *file_name, int flags);
 #define _MINIMP3_EX_IMPLEMENTATION_GUARD
 #include <limits.h>
 #include "minimp3.h"
-
+//done
 static void mp3dec_skip_id3v1(const uint8_t *buf, size_t *pbuf_size)
 {
     size_t buf_size = *pbuf_size;
@@ -157,7 +311,7 @@ static void mp3dec_skip_id3v1(const uint8_t *buf, size_t *pbuf_size)
 #endif
     *pbuf_size = buf_size;
 }
-
+//done
 static size_t mp3dec_skip_id3v2(const uint8_t *buf, size_t buf_size)
 {
 #define MINIMP3_ID3_DETECT_SIZE 10
@@ -172,7 +326,7 @@ static size_t mp3dec_skip_id3v2(const uint8_t *buf, size_t buf_size)
 #endif
     return 0;
 }
-
+//done
 static void mp3dec_skip_id3(const uint8_t **pbuf, size_t *pbuf_size)
 {
     uint8_t *buf = (uint8_t *)(*pbuf);
@@ -498,7 +652,7 @@ int mp3dec_load_cb(mp3dec_t *dec, mp3dec_io_t *io, uint8_t *buf, size_t buf_size
         info->avg_bitrate_kbps = avg_bitrate_kbps/frames;
     return ret;
 }
-
+//done
 int mp3dec_iterate_buf(const uint8_t *buf, size_t buf_size, MP3D_ITERATE_CB callback, void *user_data)
 {
     const uint8_t *orig_buf = buf;
@@ -671,7 +825,7 @@ static int mp3dec_load_index(void *user_data, const uint8_t *frame, int frame_si
         dec->samples += hdr_frame_samples(frame)*info->channels;
     return 0;
 }
-
+//done
 int mp3dec_ex_open_buf(mp3dec_ex_t *dec, const uint8_t *buf, size_t buf_size, int flags)
 {
     if (!dec || !buf || (size_t)-1 == buf_size || (flags & (~MP3D_FLAGS_MASK)))
@@ -1032,7 +1186,7 @@ static void mp3dec_close_file(mp3dec_map_info_t *map_info)
     map_info->buffer = 0;
     map_info->size   = 0;
 }
-
+//done
 static int mp3dec_open_file(const char *file_name, mp3dec_map_info_t *map_info)
 {
     if (!file_name)
@@ -1279,7 +1433,7 @@ static int mp3dec_iterate_mapinfo(mp3dec_map_info_t *map_info, MP3D_ITERATE_CB c
     mp3dec_close_file(map_info);
     return ret;
 }
-
+//done
 static int mp3dec_ex_open_mapinfo(mp3dec_ex_t *dec, int flags)
 {
     int ret = mp3dec_ex_open_buf(dec, dec->file.buffer, dec->file.size, flags);
@@ -1315,7 +1469,7 @@ int mp3dec_iterate(const char *file_name, MP3D_ITERATE_CB callback, void *user_d
         return ret;
     return mp3dec_iterate_mapinfo(&map_info, callback, user_data);
 }
-
+//done
 int mp3dec_ex_open(mp3dec_ex_t *dec, const char *file_name, int flags)
 {
     int ret;

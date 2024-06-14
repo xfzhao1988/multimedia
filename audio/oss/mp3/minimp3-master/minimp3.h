@@ -10,11 +10,97 @@
 
 #define MINIMP3_MAX_SAMPLES_PER_FRAME (1152*2)
 
+/**
+ * 这个结构体定义了MP3解码器中的音频帧信息，包括帧大小、帧偏移量、声道数、采样率、层级和比特率。
+ * 以下是对该结构体各个成员的详细解释：
+ *
+ *  typedef struct
+ *   {
+ *      int frame_bytes; // 音频帧的大小（以字节为单位）。
+ *      int frame_offset; // 音频帧在数据流中的偏移量（以字节为单位）。
+ *      int channels; // 音频帧中的声道数。
+ *      int hz; // 音频帧的采样率（以赫兹为单位）。
+ *      int layer; // 音频帧的MPEG层级（通常为1、2或3）。
+ *      int bitrate_kbps; // 音频帧的比特率（以千位/秒为单位）。
+ *  } mp3dec_frame_info_t;
+ *
+ * 详细解释
+ *
+ * int frame_bytes:
+ * 用途：表示音频帧的大小，即解码后的音频帧的数据大小。
+ * 帧大小：以字节为单位，表示解码后的音频帧的数据大小。
+ *
+ * int frame_offset:
+ * 用途：表示音频帧在数据流中的偏移量，即音频帧在整个数据流中的位置。
+ * 帧偏移量：以字节为单位，表示音频帧在数据流中的偏移位置。
+ *
+ * int channels:
+ * 用途：表示音频帧中的声道数，即音频帧中的音频通道数量。
+ * 声道数：表示音频帧中同时包含的独立音频通道的数量。
+ *
+ * int hz:
+ * 用途：表示音频帧的采样率，即音频数据的采样频率。
+ * 采样率：以赫兹为单位，表示每秒采集的音频样本数。
+ *
+ * int layer:
+ * 用途：表示音频帧的MPEG层级，通常为1、2或3，对应MPEG-1、MPEG-2和MPEG-2.5。
+ * MPEG层级：表示使用的MPEG音频层级，影响音频编码的参数和质量。
+ *
+ * int bitrate_kbps:
+ * 用途：表示音频帧的比特率，即音频数据的传输速率。
+ * 比特率：以千位/秒为单位，表示每秒传输的音频数据位数。
+ *
+ * 这个结构体允许MP3解码器将解码后的音频帧信息存储为一组帧大小、偏移量、声道数、采样率、
+ * MPEG层级和比特率等参数，以便用户了解解码后的音频数据的特性和属性。
+ *
+*/
 typedef struct
 {
     int frame_bytes, frame_offset, channels, hz, layer, bitrate_kbps;
 } mp3dec_frame_info_t;
 
+/**
+ * 这是一个定义MP3解码器内部状态的结构体。在音频解码库中，类似这样的结构体
+ * 通常用于存储解码器在处理音频流时需要维护的各种内部状态。以下是对该结构体各个成员的详细解释：
+ *  typedef struct
+ *  {
+ *      float mdct_overlap[2][9*32]; // MDCT重叠缓冲区，存储前一帧的数据用于IMDCT变换。
+ *      float qmf_state[15*2*32]; // QMF滤波器状态，用于存储滤波器的状态数据。
+ *      int reserv; // 用于存储比特流中的保留位。
+ *      int free_format_bytes; // 存储自由格式的字节数。
+ *      unsigned char header[4]; // MP3帧头部信息。
+ *      unsigned char reserv_buf[511]; // 用于保留比特流的数据缓冲区。
+ *  } mp3dec_t;
+ * 详细解释
+ * float mdct_overlap[2][9*32]:
+ * 用途：用于存储MDCT（修改离散余弦变换）重叠缓冲区。
+ * MDCT重叠：MDCT用于将时域信号转换为频域信号。在MP3解码过程中，重叠部分是用于处理帧之间的连续性的。
+ * 维度解释：2代表立体声通道（左、右），9*32是MDCT块大小和缓冲区的具体大小。
+ *
+ * float qmf_state[15*2*32]:
+ * 用途：用于存储QMF（Quadrature Mirror Filter）滤波器的状态。
+ * QMF滤波器：用于分离音频信号的不同频带，常用于多频带处理。
+ * 维度解释：15*2*32中的15是滤波器的历史数据，2代表立体声通道，32是滤波器的子带数。
+ *
+ * int reserv:
+ * 用途：存储比特流中的保留位。
+ * 保留位：在MP3比特流中，用于音频数据之外的信息存储。
+ *
+ * int free_format_bytes:
+ * 用途：存储自由格式的字节数。
+ * 自由格式：MP3标准允许某些比特率模式下的自由格式音频流，在这种模式下需要存储每帧的字节数。
+ *
+ * unsigned char header[4]:
+ * 用途：存储MP3帧头部信息。
+ * 帧头：包含音频数据的各种元数据信息，如比特率、采样率、通道模式等。
+ *
+ * unsigned char reserv_buf[511]:
+ * 用途：用于保留比特流的数据缓冲区。
+ * 保留数据：在MP3解码过程中，某些数据需要临时存储以供后续处理。
+ * 这个结构体定义了一个MP3解码器在解码过程中所需的关键状态信息，确保解码过程能够正确维护前后帧之间
+ * 的连续性和音频数据的完整性。
+ *
+*/
 typedef struct
 {
     float mdct_overlap[2][9*32], qmf_state[15*2*32];
@@ -64,17 +150,39 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
 #define HDR_IS_FREE_FORMAT(h)       (((h[2]) & 0xF0) == 0)
 #define HDR_IS_CRC(h)               (!((h[1]) & 1))
 #define HDR_TEST_PADDING(h)         ((h[2]) & 0x2)
+/**
+ * 0000 1000
+ * 111x 1xxx
+ * 表示mpeg1
+*/
 #define HDR_TEST_MPEG1(h)           ((h[1]) & 0x8)
 #define HDR_TEST_NOT_MPEG25(h)      ((h[1]) & 0x10)
 #define HDR_TEST_I_STEREO(h)        ((h[3]) & 0x10)
 #define HDR_TEST_MS_STEREO(h)       ((h[3]) & 0x20)
 #define HDR_GET_STEREO_MODE(h)      (((h[3]) >> 6) & 3)
 #define HDR_GET_STEREO_MODE_EXT(h)  (((h[3]) >> 4) & 3)
+/**
+ * 0000 0011
+ * 111x xxxx
+ * 表示去layer的二位值
+*/
 #define HDR_GET_LAYER(h)            (((h[1]) >> 1) & 3)
 #define HDR_GET_BITRATE(h)          ((h[2]) >> 4)
 #define HDR_GET_SAMPLE_RATE(h)      (((h[2]) >> 2) & 3)
 #define HDR_GET_MY_SAMPLE_RATE(h)   (HDR_GET_SAMPLE_RATE(h) + (((h[1] >> 3) & 1) + ((h[1] >> 4) & 1))*3)
+/**
+ *      1110
+ * 111x 001x
+ * 0000 0010
+ * 为true表示mpeg2/mpeg2.5 的layer3
+*/
 #define HDR_IS_FRAME_576(h)         ((h[1] & 14) == 2)
+/**
+ * 0000 0110
+ * 111x xxxx
+ * 0000 0110
+ * 表示layer1
+*/
 #define HDR_IS_LAYER_1(h)           ((h[1] & 6) == 6)
 
 #define BITS_DEQUANTIZER_OUT        -1
@@ -203,6 +311,33 @@ static __inline__ __attribute__((always_inline)) int32_t minimp3_clip_int16_arm(
 #define HAVE_ARMV6 0
 #endif
 
+/**
+ * 这个结构体定义了比特流（bitstream）的状态信息，用于在解码过程中管理比特流的读取。
+ * 以下是对该结构体各个成员的详细解释：
+ *
+ *  typedef struct
+ *   {
+ *      const uint8_t *buf; // 指向包含比特流数据的缓冲区的指针。
+ *      int pos; // 当前读取位置在缓冲区中的索引。
+ *      int limit; // 比特流数据的结束位置在缓冲区中的索引。
+ *  } bs_t;
+ *
+ * 详细解释
+ * *const uint8_t buf:
+ * 用途：指向包含比特流数据的缓冲区的指针。
+ * 比特流缓冲区：这是一个指针，指向一个包含待解码的比特流数据的内存区域。
+ *
+ * int pos:
+ * 用途：当前读取位置在缓冲区中的索引。
+ * 读取位置：这是一个整数值，表示当前解码器在比特流缓冲区中的读取位置。
+ *
+ * int limit:
+ * 用途：比特流数据的结束位置在缓冲区中的索引。
+ * 结束位置：这是一个整数值，表示比特流数据在缓冲区中的结束位置。
+ *
+ * 这个结构体用于在解码过程中管理比特流的读取，包括指向数据的指针、当前读取位置
+ * 和结束位置等信息。通过更新这些信息，解码器可以正确地从比特流中读取数据以进行解码。
+*/
 typedef struct
 {
     const uint8_t *buf;
@@ -220,6 +355,99 @@ typedef struct
     uint8_t tab_offset, code_tab_width, band_count;
 } L12_subband_alloc_t;
 
+/**
+ * 这个结构体定义了MP3解码器中的一组帧信息，用于存储解码后的音频帧的详细信息。以下
+ * 是对该结构体各个成员的详细解释：
+ *
+ *  typedef struct
+ *  {
+ *      const uint8_t *sfbtab; // 指向用于解码的比例因子（scalefactor）表的指针。
+ *      uint16_t part_23_length; // 由短块的固定位和第三部分的长度组成的整数。
+ *      uint16_t big_values; // 大值区域的大小。
+ *      uint16_t scalefac_compress; // 缩放因子压缩。
+ *      uint8_t global_gain; // 全局增益。
+ *      uint8_t block_type; // 音频帧的块类型。
+ *      uint8_t mixed_block_flag; // 混合块标志。
+ *      uint8_t n_long_sfb; // 长块的子带数量。
+ *      uint8_t n_short_sfb; // 短块的子带数量。
+ *      uint8_t table_select[3]; // 表选择信息，用于解码量化数据。
+ *      uint8_t region_count[3]; // 每个频带的区域计数。
+ *      uint8_t subblock_gain[3]; // 子块增益。
+ *      uint8_t preflag; // 前向标志。
+ *      uint8_t scalefac_scale; // 比例因子缩放。
+ *      uint8_t count1_table; // 计数1表，用于解码计数1区域。
+ *      uint8_t scfsi; // 每个子带是否跳过比例因子信息的标志。
+ *  } L3_gr_info_t;
+ *
+ *
+ * 详细解释
+ * *const uint8_t sfbtab:
+ * 用途：指向用于解码的比例因子（scalefactor）表的指针。
+ * 比例因子表：比例因子表包含了用于解码音频数据的比例因子信息。
+ *
+ * uint16_t part_23_length:
+ * 用途：由短块的固定位和第三部分的长度组成的整数。
+ * 短块长度：用于表示短块的长度信息。
+ *
+ * uint16_t big_values:
+ * 用途：大值区域的大小。
+ * 大值数量：表示音频帧中大值区域的样本数量。
+ *
+ * uint16_t scalefac_compress:
+ * 用途：缩放因子压缩。
+ * 缩放因子压缩：用于表示缩放因子的压缩信息。
+ *
+ * uint8_t global_gain:
+ * 用途：全局增益。
+ * 全局增益：用于表示音频帧的全局增益值。
+ *
+ * uint8_t block_type:
+ * 用途：音频帧的块类型。
+ * 块类型：表示音频帧中的块类型。
+ *
+ * uint8_t mixed_block_flag:
+ * 用途：混合块标志。
+ * 混合块标志：用于表示音频帧是否包含混合块。
+ *
+ * uint8_t n_long_sfb:
+ * 用途：长块的子带数量。
+ * 长块子带数量：表示长块中的子带数量。
+ *
+ * uint8_t n_short_sfb:
+ * 用途：短块的子带数量。
+ * 短块子带数量：表示短块中的子带数量。
+ *
+ * uint8_t table_select[3]:
+ * 用途：表选择信息，用于解码量化数据。
+ * 表选择信息：用于选择用于解码量化数据的表。
+ *
+ * uint8_t region_count[3]:
+ * 用途：每个频带的区域计数。
+ * 区域计数：表示每个频带中的区域数量。
+ *
+ * uint8_t subblock_gain[3]:
+ * 用途：子块增益。
+ * 子块增益：表示音频帧中的子块增益。
+ *
+ * uint8_t preflag:
+ * 用途：前向标志。
+ * 前向标志：表示音频帧是否使用了前向滤波。
+ *
+ * uint8_t scalefac_scale:
+ * 用途：比例因子缩放。
+ * 比例因子缩放：表示比例因子的缩放值。
+ *
+ * uint8_t count1_table:
+ * 用途：计数1表，用于解码计数1区域。
+ * 计数1表：用于解码计数1区域的表。
+ *
+ * uint8_t scfsi:
+ * 用途：每个子带是否跳过比例因子信息的标志。
+ * 跳过比例因子信息：表示每个子带是否跳过比例因子信息的标志。
+ *
+ * 这个结构体用于存储解码后的音频帧的详细信息，包括各种参数和标志，以便在解码过
+
+*/
 typedef struct
 {
     const uint8_t *sfbtab;
@@ -229,6 +457,45 @@ typedef struct
     uint8_t preflag, scalefac_scale, count1_table, scfsi;
 } L3_gr_info_t;
 
+/**
+ * 这个结构体定义了MP3解码器中的一些临时缓冲区和状态信息，
+ * 用于在解码过程中存储和处理临时数据。以下是对该结构体各个成员的详细解释：
+ *
+ *  typedef struct
+ *   {
+ *      bs_t bs; // 比特流状态信息，用于在解码过程中管理比特流的读取。
+ *      uint8_t maindata[MAX_BITRESERVOIR_BYTES + MAX_L3_FRAME_PAYLOAD_BYTES]; // 主数据缓冲区，用于存储解码后的主数据。
+ *      L3_gr_info_t gr_info[4]; // MP3解码器的组信息数组，用于存储解码后的音频帧信息。
+ *      float grbuf[2][576]; // 解码后的音频数据缓冲区，用于存储解码后的音频数据。
+ *      float scf[40]; // 缩放因子缓冲区，用于存储解码后的缩放因子信息。
+ *      float syn[18 + 15][2*32]; // 合成滤波器缓冲区，用于存储解码后的合成滤波器数据。
+ *      uint8_t ist_pos[2][39]; // 用于存储解码过程中的临时状态信息。
+ *  } mp3dec_scratch_t;
+ *
+ * 详细解释
+ * bs_t bs:
+ * 用途：比特流状态信息，用于在解码过程中管理比特流的读取。
+ *
+ * uint8_t maindata[MAX_BITRESERVOIR_BYTES + MAX_L3_FRAME_PAYLOAD_BYTES]:
+ * 用途：主数据缓冲区，用于存储解码后的主数据。主数据是经过解码器处理后的音频数据。
+ *
+ * L3_gr_info_t gr_info[4]:
+ * 用途：MP3解码器的组信息数组，用于存储解码后的音频帧信息。
+ *
+ * float grbuf[2][576]:
+ * 用途：解码后的音频数据缓冲区，用于存储解码后的音频数据。这个缓冲区包含了经过解码后的音频样本数据。
+ *
+ * float scf[40]:
+ * 用途：缩放因子缓冲区，用于存储解码后的缩放因子信息。缩放因子通常用于控制音频数据的幅度范围。
+ *
+ * float syn[18 + 15][2*32]:
+ * 用途：合成滤波器缓冲区，用于存储解码后的合成滤波器数据。合成滤波器用于重建音频信号。
+ *
+ * uint8_t ist_pos[2][39]:
+ * 用途：用于存储解码过程中的临时状态信息。
+ *
+ * 这个结构体包含了解码器在解码过程中需要用到的各种临时缓冲区和状态信息，确保解码过程能够正确地进行并生成解码后的音频数据。
+*/
 typedef struct
 {
     bs_t bs;
@@ -237,7 +504,7 @@ typedef struct
     float grbuf[2][576], scf[40], syn[18 + 15][2*32];
     uint8_t ist_pos[2][39];
 } mp3dec_scratch_t;
-
+//done
 static void bs_init(bs_t *bs, const uint8_t *data, int bytes)
 {
     bs->buf   = data;
@@ -260,18 +527,38 @@ static uint32_t get_bits(bs_t *bs, int n)
     }
     return cache | (next >> -shl);
 }
-
+//done
 static int hdr_valid(const uint8_t *h)
 {
+    /**
+     * (h[1] & 0xF0) == 0xf0：
+     * 表示帧头的Frame sync三个位bit恒为 1 1 1，
+     * 且版本号的两位中的高位为1（这样的版本号为：10 - MPEG Version 2 (ISO/IEC 13818-3)，
+     * 或者为11 - MPEG Version 1 (ISO/IEC 11172-3)）
+     *
+     * (h[1] & 0xFE) == 0xe2)：
+     * 0xFE: 1111 1110
+     * 0xe2: 1110 0010
+     * 表示帧头的Frame sync三个位bit恒为 1 1 1，且版本号中的两位为00
+     * （表示00 - MPEG Version 2.5 (unofficial extension of MPEG 2)）,
+     * 且表示层的两位为01，表示01 - Layer III
+     *
+     * 二者相或表示支持mpeg1/mpeg2的layer1/layer2/layer3，或者mpeg2.5的layer3
+    */
     return h[0] == 0xff &&
         ((h[1] & 0xF0) == 0xf0 || (h[1] & 0xFE) == 0xe2) &&
         (HDR_GET_LAYER(h) != 0) &&
         (HDR_GET_BITRATE(h) != 15) &&
         (HDR_GET_SAMPLE_RATE(h) != 3);
 }
-
+//done
 static int hdr_compare(const uint8_t *h1, const uint8_t *h2)
 {
+    /**
+     * (h1[1] ^ h2[1]) & 0xFE) == 0:表示h1和h2均为mpeg帧的帧头
+     * (h1[2] ^ h2[2]) & 0x0C) == 0:表示h1和h2有相同的采样率
+     * !(HDR_IS_FREE_FORMAT(h1) ^ HDR_IS_FREE_FORMAT(h2)：表示h1和h2均为自由格式或均为非自由格式
+    */
     return hdr_valid(h2) &&
         ((h1[1] ^ h2[1]) & 0xFE) == 0 &&
         ((h1[2] ^ h2[2]) & 0x0C) == 0 &&
@@ -286,18 +573,18 @@ static unsigned hdr_bitrate_kbps(const uint8_t *h)
     };
     return 2*halfrate[!!HDR_TEST_MPEG1(h)][HDR_GET_LAYER(h) - 1][HDR_GET_BITRATE(h)];
 }
-
+//done
 static unsigned hdr_sample_rate_hz(const uint8_t *h)
 {
     static const unsigned g_hz[3] = { 44100, 48000, 32000 };
     return g_hz[HDR_GET_SAMPLE_RATE(h)] >> (int)!HDR_TEST_MPEG1(h) >> (int)!HDR_TEST_NOT_MPEG25(h);
 }
-
+//done
 static unsigned hdr_frame_samples(const uint8_t *h)
 {
     return HDR_IS_LAYER_1(h) ? 384 : (1152 >> (int)HDR_IS_FRAME_576(h));
 }
-
+//done
 static int hdr_frame_bytes(const uint8_t *h, int free_format_size)
 {
     int frame_bytes = hdr_frame_samples(h)*hdr_bitrate_kbps(h)*125/hdr_sample_rate_hz(h);
@@ -307,7 +594,7 @@ static int hdr_frame_bytes(const uint8_t *h, int free_format_size)
     }
     return frame_bytes ? frame_bytes : free_format_size;
 }
-
+//done
 static int hdr_padding(const uint8_t *h)
 {
     return HDR_TEST_PADDING(h) ? (HDR_IS_LAYER_1(h) ? 4 : 1) : 0;
@@ -1653,7 +1940,7 @@ static void mp3d_synth_granule(float *qmf_state, float *grbuf, int nbands, int n
         memcpy(qmf_state, lins + nbands*64, sizeof(float)*15*64);
     }
 }
-
+//done
 static int mp3d_match_frame(const uint8_t *hdr, int mp3_bytes, int frame_bytes)
 {
     int i, nmatch;
@@ -1667,7 +1954,7 @@ static int mp3d_match_frame(const uint8_t *hdr, int mp3_bytes, int frame_bytes)
     }
     return 1;
 }
-
+//done
 static int mp3d_find_frame(const uint8_t *mp3, int mp3_bytes, int *free_format_bytes, int *ptr_frame_bytes)
 {
     int i, k;
@@ -1678,12 +1965,16 @@ static int mp3d_find_frame(const uint8_t *mp3, int mp3_bytes, int *free_format_b
             int frame_bytes = hdr_frame_bytes(mp3, *free_format_bytes);
             int frame_and_padding = frame_bytes + hdr_padding(mp3);
 
+            /**
+             * i + 2*k < mp3_bytes - HDR_SIZE解释：表示有两个自由帧的长度字节数i + 2*k没有超过mp3_bytes - HDR_SIZE的size
+            */
             for (k = HDR_SIZE; !frame_bytes && k < MAX_FREE_FORMAT_FRAME_SIZE && i + 2*k < mp3_bytes - HDR_SIZE; k++)
             {
-                if (hdr_compare(mp3, mp3 + k))
+                if (hdr_compare(mp3, mp3 + k))//mp3开始处为当前的自由帧，mp3+k为下一个自由帧开始处
                 {
-                    int fb = k - hdr_padding(mp3);
-                    int nextfb = fb + hdr_padding(mp3 + k);
+                    int fb = k - hdr_padding(mp3);//mp3自由帧的帧长，不包含padding
+                    int nextfb = fb + hdr_padding(mp3 + k);//mp3+k自由帧的帧长，包含其padding
+                    //判断是否和下下一个自由帧相等
                     if (i + k + nextfb + HDR_SIZE > mp3_bytes || !hdr_compare(mp3, mp3 + k + nextfb))
                         continue;
                     frame_and_padding = k;
@@ -1691,6 +1982,9 @@ static int mp3d_find_frame(const uint8_t *mp3, int mp3_bytes, int *free_format_b
                     *free_format_bytes = fb;
                 }
             }
+            /**
+             * !i && frame_and_padding == mp3_bytes: 表示mp3_bytes刚好为一帧数据
+            */
             if ((frame_bytes && i + frame_and_padding <= mp3_bytes &&
                 mp3d_match_frame(mp3, mp3_bytes - i, frame_bytes)) ||
                 (!i && frame_and_padding == mp3_bytes))
@@ -1704,7 +1998,7 @@ static int mp3d_find_frame(const uint8_t *mp3, int mp3_bytes, int *free_format_b
     *ptr_frame_bytes = 0;
     return mp3_bytes;
 }
-
+//done
 void mp3dec_init(mp3dec_t *dec)
 {
     dec->header[0] = 0;

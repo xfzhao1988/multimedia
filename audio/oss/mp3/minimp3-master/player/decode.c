@@ -55,7 +55,7 @@ void decode_samples(decoder *dec, uint8_t *buf, int bytes)
     memset(buf, 0, bytes);
     mp3dec_ex_read(&dec->mp3d, (mp3d_sample_t*)buf, bytes/sizeof(mp3d_sample_t));
 }
-
+//done
 int open_dec(decoder *dec, const char *file_name)
 {
     if (!dec || !file_name || !*file_name)
