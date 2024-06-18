@@ -5,7 +5,9 @@
 #include <stdbool.h>
 #include "list.h"
 
+//#define TEST_MPEG_PARSE
 
+#ifdef TEST_MPEG_PARSE
 #define MPEG_AUDIO_FRAME_HEADER_LEN 4
 
 
@@ -247,5 +249,7 @@ typedef struct mpeg_audio_info
     uint32_t total_file_size;
 
 } mpeg_audio_info_t;
+
+#endif //TEST_MPEG_PARSE
 
 #endif /* _TEST_H_ */

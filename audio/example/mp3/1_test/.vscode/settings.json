@@ -4,6 +4,8 @@
         "inet.h": "c",
         "dbg.h": "c",
         "random": "c",
-        "minimp3_ex.h": "c"
+        "minimp3_ex.h": "c",
+        "mpeg_dec.h": "c",
+        "bs.h": "c"
     }
 }

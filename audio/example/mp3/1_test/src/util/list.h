@@ -1,3 +1,5 @@
+// 来自linux kernel内核链表文件：./linux-6.9.3/include/linux/list.h
+
 #ifndef _LIST_H_
 #define _LIST_H_
 

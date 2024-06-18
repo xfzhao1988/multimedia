@@ -9,7 +9,7 @@ headers = $(wildcard *.h)
 objects = $(sources:.c=.o)
 depens = $(objects:.o=.d)
 
-target = libutil.a
+target = libaformat.a
 
 $(target): $(objects)
 	$(AR) rv $@ $^; \

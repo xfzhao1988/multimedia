@@ -12,9 +12,11 @@
 
 #include "dbg.h"
 #include "test.h"
+#include "bs.h"
 
 
-#if 0
+#ifdef TEST_MPEG_PARSE
+
 #define ID3V2_TAG_HEADER_SIZE 10
 #define ID3V2_TAG_ID "ID3"
 #define MPEG_AUDIO_FRAME_HEADER_SIZE 4
@@ -779,6 +781,7 @@ int main(int argc, char* argv[])
 }
 #endif
 
+#if 0
 #include "bs.h"
 
 int main(int argc, char* argv[])
@@ -798,6 +801,42 @@ int main(int argc, char* argv[])
     uint64_t val = get_bits(&bs, 16);
 
     DBG_INFO("%lx\n", val);
+
+    return 0;
+}
+#endif
+
+#include "mpeg_dec.h"
+
+static void on_meta_data(mpeg_dec_meta_key_e key, const mpeg_dec_meta_data_t* meta_data)
+{
+
+}
+
+static void on_complete()
+{
+
+}
+
+int main(int argc, char* argv[])
+{
+
+    mpeg_decoder dec = NULL;
+
+    mpeg_dec_init(&dec);
+
+    const mpeg_dec_parse_callbacks_t cbs =
+    {
+        .on_meta_data = on_meta_data,
+        .on_complete = on_complete
+    };
+
+    mpeg_dec_parse_file(dec,
+                        argv[1],
+                        &cbs,
+                        0);
+
+    mpeg_dec_deinit(&dec);
 
     return 0;
 }

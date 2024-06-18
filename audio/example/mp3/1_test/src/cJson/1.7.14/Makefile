@@ -17,7 +17,7 @@ $(TARGET):$(objects)
 	$(CC) $(LD_FLAGS) $^ -o $@; \
 	$(CP) $(headrs) $(ROOT)/include; \
 	$(CP) $(TARGET) $(ROOT)/lib; \
-	$(RM) $(target) $(objects) $(depens)
+	$(RM) $(TARGET) $(objects) $(depens)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@

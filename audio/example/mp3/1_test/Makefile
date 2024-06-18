@@ -20,7 +20,7 @@ echo:
 	echo "$(MAKE)"; \
 	cd $(SRC_PATH); \
 	$(MAKE) echo
-	
+
 
 .PHONY: all clean echo
 

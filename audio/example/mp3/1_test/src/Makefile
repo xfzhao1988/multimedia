@@ -4,7 +4,7 @@ SHELL := /bin/bash
 
 include $(ROOT)/include.mk
 
-MAKE_ALL_RULE = $(SRC_PATH)/cJson $(SRC_PATH)/dbg $(SRC_PATH)/util $(SRC_PATH)/test
+MAKE_ALL_RULE = $(SRC_PATH)/dbg $(SRC_PATH)/cJson $(SRC_PATH)/util $(SRC_PATH)/libaformat $(SRC_PATH)/test
 
 all:
 	for i in $(MAKE_ALL_RULE);\
@@ -12,7 +12,7 @@ all:
 	cd $$i && $(MAKE); \
 	done
 
-MAKE_CLEAN_RULE := $(SRC_PATH)/test $(SRC_PATH)/dbg $(SRC_PATH)/util $(SRC_PATH)/cJson
+MAKE_CLEAN_RULE := $(SRC_PATH)/test $(SRC_PATH)/libaformat $(SRC_PATH)/util $(SRC_PATH)/cJson $(SRC_PATH)/dbg
 
 clean:
 	for i in $(MAKE_CLEAN_RULE);\

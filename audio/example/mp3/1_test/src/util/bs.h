@@ -1,3 +1,5 @@
+//来自minimp3中minimp3.h
+
 #ifndef _BS_H_
 #define _BS_H_
 
@@ -14,11 +16,19 @@ typedef struct
     uint64_t limit;
 } bs_t;
 
-extern void bs_init(bs_t *bs, const uint8_t *data, int bytes);
+void bs_init(bs_t *bs, const uint8_t *data, int bytes);
 
-extern uint64_t get_bits(bs_t *bs, int n);
+uint8_t get_bits_u8(bs_t* bs);
 
-extern void skip_bits(bs_t *bs, int n);
+uint16_t get_bits_u16(bs_t* bs);
+
+uint32_t get_bits_u32(bs_t* bs);
+
+uint64_t get_bits_u64(bs_t* bs);
+
+uint64_t get_bits(bs_t *bs, int n);
+
+void skip_bits(bs_t *bs, int n);
 
 #if defined(__cplusplus) || defined(c_plusplus)
 }
