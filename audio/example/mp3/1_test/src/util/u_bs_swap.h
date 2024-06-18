@@ -1,5 +1,8 @@
 #ifndef _U_BS_SWAP_H_
 #define _U_BS_SWAP_H_
+
+#include <stdint.h>
+
 /**
 在计算机领域中，大小端（Endian）指的是数据在内存中存储的字节序（顺序）方式。有两种常见的字节序：
 
@@ -95,5 +98,50 @@ int main(int argc, char *argv[])
 
 #define U_B_SWAPC(s, x) U_B_SWAP##s##C(x)
 
+static inline const uint16_t u_b_swap16(uint16_t x)
+{
+    x= (x>>8) | (x<<8);
+    return x;
+}
+
+static inline const uint32_t u_b_swap32(uint32_t x)
+{
+    return U_B_SWAP32C(x);
+}
+
+static inline const uint64_t u_b_swap64(uint64_t x)
+{
+    return (uint64_t)u_b_swap32(x) << 32 | u_b_swap32(x >> 32);
+}
+
+// be2ne ... big-endian to native-endian
+// le2ne ... little-endian to native-endian
+
+#if U_HAVE_BIGENDIAN
+#define u_be2ne16(x) (x)
+#define u_be2ne32(x) (x)
+#define u_be2ne64(x) (x)
+#define u_le2ne16(x) u_bswap16(x)
+#define u_le2ne32(x) u_bswap32(x)
+#define u_le2ne64(x) u_bswap64(x)
+#define U_BE2NEC(s, x) (x)
+#define U_LE2NEC(s, x) U_BSWAPC(s, x)
+#else
+#define u_be2ne16(x) u_bswap16(x)
+#define u_be2ne32(x) u_bswap32(x)
+#define u_be2ne64(x) u_bswap64(x)
+#define u_le2ne16(x) (x)
+#define u_le2ne32(x) (x)
+#define u_le2ne64(x) (x)
+#define U_BE2NEC(s, x) U_BSWAPC(s, x)
+#define U_LE2NEC(s, x) (x)
+#endif
+
+#define U_BE2NE16C(x) U_BE2NEC(16, x)
+#define U_BE2NE32C(x) U_BE2NEC(32, x)
+#define U_BE2NE64C(x) U_BE2NEC(64, x)
+#define U_LE2NE16C(x) U_LE2NEC(16, x)
+#define U_LE2NE32C(x) U_LE2NEC(32, x)
+#define U_LE2NE64C(x) U_LE2NEC(64, x)
 
 #endif //_U_BS_SWAP_H_
