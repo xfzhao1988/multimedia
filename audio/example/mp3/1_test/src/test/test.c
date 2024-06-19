@@ -13,6 +13,7 @@
 #include "dbg.h"
 #include "test.h"
 #include "bs.h"
+#include "u_bs_swap.h"
 
 
 #ifdef TEST_MPEG_PARSE
@@ -748,7 +749,7 @@ int main(int argc, char *argv[])
 }
 #endif
 
-#if 0
+#if 0 //minimp3解码测试
 #include "minimp3_ex.h"
 #include "decode.h"
 
@@ -781,7 +782,7 @@ int main(int argc, char* argv[])
 }
 #endif
 
-#if 0
+#if 0 //bs.h test
 #include "bs.h"
 
 int main(int argc, char* argv[])
@@ -806,7 +807,9 @@ int main(int argc, char* argv[])
 }
 #endif
 
+#if 0 //duration解析
 #include "mpeg_dec.h"
+
 
 static void on_meta_data(mpeg_dec_meta_key_e key, const mpeg_dec_meta_data_t* meta_data)
 {
@@ -840,3 +843,42 @@ int main(int argc, char* argv[])
 
     return 0;
 }
+#endif
+
+#if 1 //u_bs_swap.h测试
+int main(int argc, char* argv[])
+{
+    FILE *fp = fopen(argv[1], "wb");
+    uint8_t buf[256] = {0};
+    uint32_t len = 0;
+    uint8_t* pbuf = buf;
+
+    uint64_t c = 0x3132333435363738;
+    uint8_t* pc = (uint8_t*)&c;
+    uint64_t uc = U_B_SWAP64C(c);
+
+    printf("%#x %#x %#x %#x %#x %#x %#x %#x\n", *pc, *(pc+1), *(pc+2), *(pc+3), *(pc+4), *(pc+5), *(pc+6), *(pc+7));
+    printf("%p %p %p %p %p %p %p %p\n", pc, (pc+1), (pc+2), (pc+3), (pc+4), (pc+5), (pc+6), (pc+7));
+
+    memcpy(pbuf, &c, sizeof(uint64_t));
+    printf("%#x %#x %#x %#x %#x %#x %#x %#x\n", *pbuf, *(pbuf+1), *(pbuf+2), *(pbuf+3), *(pbuf+4), *(pbuf+5), *(pbuf+6), *(pbuf+7));
+    printf("%p %p %p %p %p %p %p %p\n", pbuf, (pbuf+1), (pbuf+2), (pbuf+3), (pbuf+4), (pbuf+5), (pbuf+6), (pbuf+7));
+    len += 8;
+    memcpy(pbuf + sizeof(uint64_t), &uc, sizeof(uint64_t));
+    len += 8;
+
+    fwrite(&buf, 1, len, fp);
+    fclose(fp);
+
+
+    FILE *fpr = fopen(argv[1], "rb");
+    memset(&buf, 0, sizeof(buf));
+    fread(&buf, 1, len, fpr);
+    printf("%#x %#x %#x %#x %#x %#x %#x %#x\n", *pbuf, *(pbuf+1), *(pbuf+2), *(pbuf+3), *(pbuf+4), *(pbuf+5), *(pbuf+6), *(pbuf+7));
+
+    fclose(fpr);
+
+    return 0;
+}
+#endif
+

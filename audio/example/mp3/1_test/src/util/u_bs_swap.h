@@ -1,5 +1,11 @@
+//来自ffmpeg libutil模块的bswap.h文件
+
 #ifndef _U_BS_SWAP_H_
 #define _U_BS_SWAP_H_
+
+/**
+ * 用来实现双字节、四字节和八字节等多字节数据的大小端转换用
+*/
 
 #include <stdint.h>
 
@@ -47,25 +53,25 @@ int main() {
 
 int main(int argc, char *argv[])
 {
-  uint16_t a = 0x1234, bs_a = U_B_SWAP16C(a);
-  uint8_t *pa = (uint8_t*)&a, *p_bs_a = (uint8_t*)&bs_a;
-  uint32_t b = 0x12345678, bs_b = U_B_SWAP32C(b);
-  uint8_t *pb = (uint8_t*)&b, *p_bs_b = (uint8_t*)&bs_b;
-  uint64_t c = 0x1020304050607080, bs_c = U_B_SWAP64C(c);
-  uint8_t *pc = (uint8_t*)&c, *p_bs_c = (uint8_t*)&bs_c;
+    uint16_t a = 0x1234, bs_a = U_B_SWAP16C(a);
+    uint8_t *pa = (uint8_t*)&a, *p_bs_a = (uint8_t*)&bs_a;
+    uint32_t b = 0x12345678, bs_b = U_B_SWAP32C(b);
+    uint8_t *pb = (uint8_t*)&b, *p_bs_b = (uint8_t*)&bs_b;
+    uint64_t c = 0x1020304050607080, bs_c = U_B_SWAP64C(c);
+    uint8_t *pc = (uint8_t*)&c, *p_bs_c = (uint8_t*)&bs_c;
 
-  printf("%#x %#x\n", *pa, *(pa+1)); //a在内存中存储顺序，可以用来看系统的大小端。大端：数据的高位字节存储在低地址，低位字节存储在高地址;小端：数据的低位字节存储在低地址，高位字节存储在高地址。
-  printf("%p %p\n", pa, (pa+1)); //地址pa小于地址pa+1
-  printf("%#x %#x\n\n", *p_bs_a, *(p_bs_a+1));
+    printf("%#x %#x\n", *pa, *(pa+1)); //a在内存中存储顺序，可以用来看系统的大小端。大端：数据的高位字节存储在低地址，低位字节存储在高地址;小端：数据的低位字节存储在低地址，高位字节存储在高地址。
+    printf("%p %p\n", pa, (pa+1)); //地址pa小于地址pa+1
+    printf("%#x %#x\n\n", *p_bs_a, *(p_bs_a+1));
 
-  printf("%#x %#x %#x %#x\n", *pb, *(pb+1), *(pb+2), *(pb+3));
-  printf("%p %p %p %p\n", pb, (pb+1), (pb+2), (pb+3));
-  printf("%#x %#x %#x %#x\n\n", *p_bs_b, *(p_bs_b+1), *(p_bs_b+2), *(p_bs_b+3));
+    printf("%#x %#x %#x %#x\n", *pb, *(pb+1), *(pb+2), *(pb+3));
+    printf("%p %p %p %p\n", pb, (pb+1), (pb+2), (pb+3));
+    printf("%#x %#x %#x %#x\n\n", *p_bs_b, *(p_bs_b+1), *(p_bs_b+2), *(p_bs_b+3));
 
-  printf("%#x %#x %#x %#x %#x %#x %#x %#x\n", *pc, *(pc+1), *(pc+2), *(pc+3), *(pc+4), *(pc+5), *(pc+6), *(pc+7));
-  printf("%#x %#x %#x %#x %#x %#x %#x %#x\n", *p_bs_c, *(p_bs_c+1), *(p_bs_c+2), *(p_bs_c+3), *(p_bs_c+4), *(p_bs_c+5), *(p_bs_c+6), *(p_bs_c+7));
+    printf("%#x %#x %#x %#x %#x %#x %#x %#x\n", *pc, *(pc+1), *(pc+2), *(pc+3), *(pc+4), *(pc+5), *(pc+6), *(pc+7));
+    printf("%#x %#x %#x %#x %#x %#x %#x %#x\n", *p_bs_c, *(p_bs_c+1), *(p_bs_c+2), *(p_bs_c+3), *(p_bs_c+4), *(p_bs_c+5), *(p_bs_c+6), *(p_bs_c+7));
 
-	return 0;
+    return 0;
 }
 
 结果打印：
@@ -117,26 +123,29 @@ static inline const uint64_t u_b_swap64(uint64_t x)
 // be2ne ... big-endian to native-endian
 // le2ne ... little-endian to native-endian
 
-#if U_HAVE_BIGENDIAN
+#if U_HAVE_BIGENDIAN //U_HAVE_BIGENDIAN用来指示本机是否为大端字节序的系统架构
 #define u_be2ne16(x) (x)
 #define u_be2ne32(x) (x)
 #define u_be2ne64(x) (x)
-#define u_le2ne16(x) u_bswap16(x)
-#define u_le2ne32(x) u_bswap32(x)
-#define u_le2ne64(x) u_bswap64(x)
+#define u_le2ne16(x) u_b_swap16(x)
+#define u_le2ne32(x) u_b_swap32(x)
+#define u_le2ne64(x) u_b_swap64(x)
 #define U_BE2NEC(s, x) (x)
 #define U_LE2NEC(s, x) U_BSWAPC(s, x)
 #else
-#define u_be2ne16(x) u_bswap16(x)
-#define u_be2ne32(x) u_bswap32(x)
-#define u_be2ne64(x) u_bswap64(x)
+#define u_be2ne16(x) u_b_swap16(x)
+#define u_be2ne32(x) u_b_swap32(x)
+#define u_be2ne64(x) u_b_swap64(x)
 #define u_le2ne16(x) (x)
 #define u_le2ne32(x) (x)
 #define u_le2ne64(x) (x)
-#define U_BE2NEC(s, x) U_BSWAPC(s, x)
+#define U_BE2NEC(s, x) U_B_SWAPC(s, x)
 #define U_LE2NEC(s, x) (x)
 #endif
 
+/**
+ * 2/4/8字节数据大小端转local字节序相关宏的定义
+*/
 #define U_BE2NE16C(x) U_BE2NEC(16, x)
 #define U_BE2NE32C(x) U_BE2NEC(32, x)
 #define U_BE2NE64C(x) U_BE2NEC(64, x)
