@@ -622,9 +622,6 @@ int32_t mpeg_dec_parse_buf(mpeg_decoder dec,
         return MPEG_DEC_EINVAL;
     }
 
-    static uint64_t debug_size = 0;
-    debug_size += size;
-
     mpeg_decoder_internal_t* decoder = dec;
 
     if(MPEG_DEC_STATE_PARSE_COMPLETED == decoder->state)

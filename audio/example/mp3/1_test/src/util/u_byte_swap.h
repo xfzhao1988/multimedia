@@ -1,7 +1,7 @@
 //来自ffmpeg libutil模块的bswap.h文件
 
-#ifndef _U_BS_SWAP_H_
-#define _U_BS_SWAP_H_
+#ifndef _U_BYTE_SWAP_H_
+#define _U_BYTE_SWAP_H_
 
 /**
  * 用来实现双字节、四字节和八字节等多字节数据的大小端转换用
@@ -131,7 +131,7 @@ static inline const uint64_t u_b_swap64(uint64_t x)
 #define u_le2ne32(x) u_b_swap32(x)
 #define u_le2ne64(x) u_b_swap64(x)
 #define U_BE2NEC(s, x) (x)
-#define U_LE2NEC(s, x) U_BSWAPC(s, x)
+#define U_LE2NEC(s, x) U_B_SWAPC(s, x)
 #else
 #define u_be2ne16(x) u_b_swap16(x)
 #define u_be2ne32(x) u_b_swap32(x)
@@ -153,4 +153,4 @@ static inline const uint64_t u_b_swap64(uint64_t x)
 #define U_LE2NE32C(x) U_LE2NEC(32, x)
 #define U_LE2NE64C(x) U_LE2NEC(64, x)
 
-#endif //_U_BS_SWAP_H_
+#endif //end of #ifndef _U_BYTE_SWAP_H_

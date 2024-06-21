@@ -6,6 +6,16 @@
         "random": "c",
         "minimp3_ex.h": "c",
         "mpeg_dec.h": "c",
-        "bs.h": "c"
+        "bs.h": "c",
+        "typeinfo": "cpp",
+        "array": "cpp",
+        "compare": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "system_error": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp"
     }
 }

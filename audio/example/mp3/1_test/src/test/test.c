@@ -13,7 +13,7 @@
 #include "dbg.h"
 #include "test.h"
 #include "bs.h"
-#include "u_bs_swap.h"
+#include "u_byte_swap.h"
 
 
 #ifdef TEST_MPEG_PARSE
@@ -759,7 +759,6 @@ int main(int argc, char* argv[])
 {
     open_dec(&dec, argv[1]);
 
-/*
     mp3d_sample_t buffer[4096] = {0};
 
     size_t count = 0;
@@ -776,7 +775,6 @@ int main(int argc, char* argv[])
     DBG_INFO("sum: %ld, count: %ld\n", sum, count);
 
     fclose(pcm);
-*/
 
     return 0;
 }
@@ -845,7 +843,7 @@ int main(int argc, char* argv[])
 }
 #endif
 
-#if 1 //u_bs_swap.h测试
+#if 1 //u_byte_swap.h测试
 int main(int argc, char* argv[])
 {
     FILE *fp = fopen(argv[1], "wb");
