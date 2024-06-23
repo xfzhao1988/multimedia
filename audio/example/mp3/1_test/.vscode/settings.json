@@ -16,6 +16,10 @@
         "utility": "cpp",
         "system_error": "cpp",
         "string_view": "cpp",
-        "initializer_list": "cpp"
+        "initializer_list": "cpp",
+        "u_internal_rw.h": "c",
+        "u_assert.h": "c",
+        "u_common.h": "c",
+        "u_error.h": "c"
     }
 }

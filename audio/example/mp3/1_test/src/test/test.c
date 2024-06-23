@@ -805,7 +805,7 @@ int main(int argc, char* argv[])
 }
 #endif
 
-#if 0 //duration解析
+#if 1 //duration解析
 #include "mpeg_dec.h"
 
 
@@ -843,7 +843,7 @@ int main(int argc, char* argv[])
 }
 #endif
 
-#if 1 //u_byte_swap.h测试
+#if 0 //u_byte_swap.h测试
 int main(int argc, char* argv[])
 {
     FILE *fp = fopen(argv[1], "wb");

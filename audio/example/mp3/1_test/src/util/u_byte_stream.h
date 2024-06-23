@@ -39,7 +39,7 @@ static u_always_inline void u_byte_stream_put_dep_ ## name(uint8_t **b,         
 static u_always_inline void u_byte_stream_put_ ## name ## u(put_byte_context_t *p,      \
                                                    const type value)                    \
 {                                                                                       \
-    u_byte_stream_put_dep ## name(&p->buffer, value);                                   \
+    u_byte_stream_put_dep_ ## name(&p->buffer, value);                                   \
 }                                                                                       \
 static u_always_inline void u_byte_stream_put_ ## name(put_byte_context_t *p,           \
                                               const type value)                         \
@@ -52,7 +52,7 @@ static u_always_inline void u_byte_stream_put_ ## name(put_byte_context_t *p,   
 }                                                                                       \
 static u_always_inline type u_byte_stream_get_ ## name ## u(get_byte_context_t *g)      \
 {                                                                                       \
-    return u_byte_stream_get_dep ## name(&g->buffer);                                   \
+    return u_byte_stream_get_dep_ ## name(&g->buffer);                                   \
 }                                                                                       \
 static u_always_inline type u_byte_stream_get_ ## name(get_byte_context_t *g)           \
 {                                                                                       \
@@ -134,8 +134,8 @@ static u_always_inline void u_byte_stream_init(get_byte_context_t *g,
 }
 
 static u_always_inline void u_byte_stream_init_writer(put_byte_context_t *p,
-                                             uint8_t *buf,
-                                             int buf_size)
+                                                      uint8_t *buf,
+                                                      int buf_size)
 {
     u_assert0(buf_size >= 0);
     p->buffer       = buf;
@@ -155,20 +155,20 @@ static u_always_inline int u_byte_stream_get_bytes_left_p(put_byte_context_t *p)
 }
 
 static u_always_inline void u_byte_stream_skip(get_byte_context_t *g,
-                                      unsigned int size)
+                                               unsigned int size)
 {
     g->buffer += UM_MIN(g->buffer_end - g->buffer, size);
 }
 
 /* Unsafe function, not recommended */
 static u_always_inline void u_byte_stream_skipu(get_byte_context_t *g,
-                                       unsigned int size)
+                                                unsigned int size)
 {
     g->buffer += size;
 }
 
 static u_always_inline void u_byte_stream_skip_p(put_byte_context_t *p,
-                                        unsigned int size)
+                                                 unsigned int size)
 {
     int size2;
     if (p->eof)
