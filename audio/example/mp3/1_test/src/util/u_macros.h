@@ -13,4 +13,6 @@
 
 #define UM_SWAP(type,a,b) do{type SWAP_tmp= b; b= a; a= SWAP_tmp;}while(0)
 
+#define UM_MKBETAG(a,b,c,d) ((d) | ((c) << 8) | ((b) << 16) | ((unsigned)(a) << 24))
+
 #endif // end of #ifndef _U_MACROS_H_

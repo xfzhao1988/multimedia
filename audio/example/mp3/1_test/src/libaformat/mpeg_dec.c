@@ -29,6 +29,13 @@
 #define HDR_TEST_NOT_MPEG25(h)              ((h[1]) & 0x10)
 #define HDR_TEST_PADDING(h)                 ((h[2]) & 0x2)
 
+// Xing/Info and VBRI tag defines
+#define VBRI_TAG_OFFSET                     32
+#define XING_FLAG_FRAMES                    0x01
+#define XING_FLAG_SIZE                      0x02
+#define XING_FLAG_TOC                       0x04
+#define XING_FLAC_QSCALE                    0x08
+
 /**
  * Audio version ID
  *
@@ -284,6 +291,7 @@ typedef struct
     bool is_valid_mpeg_audio;
     id3_tag_info_t id3;
     struct list_head header_list;
+    bool is_first_header_parsed;
     uint8_t buf[MP3_BUF_SIZE];
     uint64_t remain_data_size;
     uint32_t total_frames;
@@ -895,6 +903,140 @@ static void _mpeg_dec_reset_audio_frame_header(mpeg_audio_frame_header_info_t* i
     INIT_LIST_HEAD(&info->list);
 }
 
+static bool _mpeg_dec_parse_VBRI_tag(mpeg_decoder_internal_t* decoder,
+                                          get_byte_context_t* gctx,
+                                          mpeg_audio_frame_header_info_t* header)
+{
+    get_byte_context_t tmp_gcxt = {0};
+    uint32_t val;
+
+    u_byte_stream_init(&tmp_gcxt, gctx->buffer, u_byte_stream_get_bytes_left(gctx));
+
+    /* Check for VBRI tag (always 32 bytes after end of mpegaudio header) */
+    u_byte_stream_seek(&tmp_gcxt, MPEG_AUDIO_FRAME_HEADER_LEN + VBRI_TAG_OFFSET, SEEK_CUR);
+
+    DBG_INFO("%#lx %c %c %c %c\n",
+             decoder->info.total_parsed + u_byte_stream_tell(&tmp_gcxt),
+             *tmp_gcxt.buffer,
+             *(tmp_gcxt.buffer + 1),
+             *(tmp_gcxt.buffer + 2),
+             *(tmp_gcxt.buffer + 3));
+
+    val = u_byte_stream_get_be32(&tmp_gcxt);
+    if(val == UM_MKBETAG('V', 'B', 'R', 'I'))
+    {
+        /* Check tag version */
+        if(u_byte_stream_get_be16(&tmp_gcxt) == 1)
+        {
+            /* skip delay and quality */
+            u_byte_stream_skip(&tmp_gcxt, 4);
+            decoder->info.total_file_size = u_byte_stream_get_be32(&tmp_gcxt);
+            decoder->info.total_frames = u_byte_stream_get_be32(&tmp_gcxt);
+            decoder->info.duration = 1000* decoder->info.total_frames * header->samples_per_frame / header->frequency; //ms
+            decoder->info.bit_rate_type = BITRATE_TYPE_VBR;
+
+            DBG_INFO("%ld, %d, %ld\n",
+                     decoder->info.total_file_size,
+                     decoder->info.total_frames,
+                     decoder->info.duration);
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool _mpeg_dec_parse_Xing_Info_tag(mpeg_decoder_internal_t* decoder,
+                                          get_byte_context_t* gctx,
+                                          mpeg_audio_frame_header_info_t* header)
+{
+    /* Side info offsets after header:
+    /                Mono  Stereo
+    /  MPEG1          17     32
+    /  MPEG2 & 2.5     9     17*/
+    static const int64_t xing_offtbl[2][2] = {{32, 17}, {17,9}};
+    int lsf = 0;
+    uint32_t side_info_offset = 0;
+    get_byte_context_t tmp_gcxt = {0};
+    uint32_t val;
+    u_byte_stream_init(&tmp_gcxt, gctx->buffer, u_byte_stream_get_bytes_left(gctx));
+
+    // skip header id filed
+    u_byte_stream_skip(&tmp_gcxt, MPEG_AUDIO_FRAME_HEADER_LEN);
+
+    // skip crc filed
+    if(MPEG_CRC_OK == header->crc)
+    {
+        u_byte_stream_skip(&tmp_gcxt, 2);
+    }
+
+    // skip side info field
+    if(MPEG_VERSION_1 == header->version)
+    {
+        lsf = 0;
+    }
+    else if(MPEG_VERSION_2 == header->version ||
+            MPEG_VERSION_2_5 == header->version)
+    {
+        lsf = 1;
+    }
+    else
+    {
+        DBG_ERROR("invalid mpeg version %d\n", header->version);
+        return false;
+    }
+
+    side_info_offset = xing_offtbl[lsf == 1][header->channelmode == MPEG_CHANNEL_MODE_SINGLE_CHANNEL];
+    DBG_INFO("side_info_offset: %d\n", side_info_offset);
+    u_byte_stream_skip(&tmp_gcxt, side_info_offset);
+
+    DBG_INFO("%#lx %#x %#x %#x %#x\n",
+             decoder->info.total_parsed + u_byte_stream_tell(&tmp_gcxt),
+             *tmp_gcxt.buffer,
+             *(tmp_gcxt.buffer + 1),
+             *(tmp_gcxt.buffer + 2),
+             *(tmp_gcxt.buffer + 3));
+
+    // tag id: Xing or Info
+    val = u_byte_stream_get_be32(&tmp_gcxt);
+    if(val == UM_MKBETAG('I', 'n', 'f', 'o'))
+    {
+        DBG_INFO("Info tag hit\n");
+        decoder->info.bit_rate_type = BITRATE_TYPE_CBR;
+    }
+    else if(val == UM_MKBETAG('X', 'i', 'n', 'g'))
+    {
+        DBG_INFO("Xing tag hit\n");
+        decoder->info.bit_rate_type = BITRATE_TYPE_VBR;
+    }
+    else
+    {
+        DBG_INFO("No tag hit\n");
+        return false;
+    }
+
+    val = u_byte_stream_get_be32(&tmp_gcxt);
+    if (val & XING_FLAG_FRAMES)
+    {
+        decoder->info.total_frames = u_byte_stream_get_be32(&tmp_gcxt);
+    }
+
+    if(val & XING_FLAG_SIZE)
+    {
+        decoder->info.total_file_size = u_byte_stream_get_be32(&tmp_gcxt);
+    }
+
+    decoder->info.duration = 1000* decoder->info.total_frames * header->samples_per_frame / header->frequency; //ms
+
+    DBG_INFO("%ld, %d, %ld\n",
+             decoder->info.total_file_size,
+             decoder->info.total_frames,
+             decoder->info.duration);
+
+    return true;
+}
+
 static void _mpeg_dec_parse_audio_frame_header(mpeg_decoder_internal_t* decoder,
                                                get_byte_context_t* gctx,
                                                int free_format_bytes)
@@ -1095,8 +1237,33 @@ static void _mpeg_dec_parse_audio_frame_header(mpeg_decoder_internal_t* decoder,
         _mpeg_dec_reset_audio_frame_header(tmp_item);
         _mpeg_dec_audio_frame_header_dup(tmp_item, &tmp_header);
         list_add_tail(&tmp_item->list, &decoder->info.header_list);
+
+        // Xing/Info tag or VBRI tag after the first audio frame header and before the second audio frame header
+        if(!decoder->info.is_first_header_parsed)
+        {
+            decoder->info.is_first_header_parsed = true;
+
+            // parse vbr tags: Xing/Info tag or VBRI tag
+            if(_mpeg_dec_parse_VBRI_tag(decoder, gctx, &tmp_header))
+            {
+                DBG_INFO("VBRI tag hit\n");
+            }
+            else if(_mpeg_dec_parse_Xing_Info_tag(decoder, gctx, &tmp_header))
+            {
+                DBG_INFO("Xing/Info tag hit\n");
+            }
+            else
+            {
+                if (tmp_header.bitrate != MPEG_BITRATE_NONE && tmp_header.frequency > 0)
+                {
+                    decoder->info.bit_rate_type = BITRATE_TYPE_FREE;
+                }
+                DBG_INFO("No tag hit\n");
+            }
+        }
         decoder->info.total_frames++;
     }
+
 
     // skip本帧帧长bytes继续寻找下一帧
     u_byte_stream_skip(gctx, tmp_header.frame_length);
