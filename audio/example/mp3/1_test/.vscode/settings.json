@@ -20,6 +20,8 @@
         "u_internal_rw.h": "c",
         "u_assert.h": "c",
         "u_common.h": "c",
-        "u_error.h": "c"
+        "u_error.h": "c",
+        "u_attributes.h": "c",
+        "u_byte_swap.h": "c"
     }
 }

@@ -138,8 +138,75 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
 #define MAX_FRAME_SYNC_MATCHES      10
 #endif /* MAX_FRAME_SYNC_MATCHES */
 
+/**
+这段代码定义了一个常量 MAX_L3_FRAME_PAYLOAD_BYTES，并解释了它的值和计算方式。以下是详细的解释：
+
+宏定义
+#define MAX_L3_FRAME_PAYLOAD_BYTES  MAX_FREE_FORMAT_FRAME_SIZE // MUST be >= 320000/8/32000*1152 = 1440
+
+MAX_L3_FRAME_PAYLOAD_BYTES: 这是一个预处理器宏，用于定义 Layer 3 (L3) 帧的最大有效负载字节数。
+
+MAX_FREE_FORMAT_FRAME_SIZE: 这个宏的值用于设置 MAX_L3_FRAME_PAYLOAD_BYTES 的大小。具体的值需要在代码的其他部分定义。
+
+注释部分: 解释了 MAX_L3_FRAME_PAYLOAD_BYTES 必须满足的最低要求，并给出了计算公式。
+
+注释的计算公式
+// MUST be >= 320000/8/32000*1152 = 1440
+
+这个注释部分解释了为什么 MAX_L3_FRAME_PAYLOAD_BYTES 的值必须至少是 1440。以下是计算步骤：
+
+比特率 (bitrate): 320 kbps (320000 bits per second)
+每字节的比特数: 8 bits/byte
+采样率 (sampling rate): 32 kHz (32000 samples per second)
+每帧的采样数: 1152 samples/frame (这是 MPEG Layer 3 的标准，每帧包含 1152 个采样)计算步骤如下：
+
+每秒传输的字节数：
+320000/8 = 40000 bytes per second
+每帧的字节数：
+40000 / 32000 × 1152 = 1.25 × 1152 = 1440 bytes per frame
+
+因此，MAX_L3_FRAME_PAYLOAD_BYTES 必须至少是 1440 字节，以确保满足在最高比特率和最低采样率下，每个 L3 帧的最大负载要求。
+
+具体实现
+在具体的代码实现中，MAX_FREE_FORMAT_FRAME_SIZE 可能已经根据特定的音频编码标准设置为某个值，以确保在自由格式下的最大帧
+大小能够满足上述计算要求。
+
+总结
+
+这段代码通过定义 MAX_L3_FRAME_PAYLOAD_BYTES 来确保 Layer 3 帧的最大有效负载字节数至少为 1440 字节，以适应最高比特率和
+最低采样率下的要求。这个定义通常在处理音频数据时用来确保缓冲区和帧处理的安全性。
+*/
 #define MAX_L3_FRAME_PAYLOAD_BYTES  MAX_FREE_FORMAT_FRAME_SIZE /* MUST be >= 320000/8/32000*1152 = 1440 */
 
+/**
+这个宏定义了 MAX_BITRESERVOIR_BYTES 的值为 511。以下是详细的解释：
+
+定义的含义
+MAX_BITRESERVOIR_BYTES: 这是一个预处理器宏，用于定义比特储存区的最大字节数。
+
+比特储存区 (Bit Reservoir)
+在音频编码（特别是 MPEG Layer 3，即 MP3 编码）中，比特储存区是一种技术，用于在帧之间分配比特率。由于每个音频帧的复杂性不同，
+有些帧可能需要更多的比特来保持音质，而有些帧则需要较少的比特。比特储存区允许将未使用的比特储存在后续的帧中使用，
+以平滑比特率的变化并提高编码效率。
+
+为什么是 511？
+比特储存区的大小限制通常由编码标准决定。在 MPEG-1 Layer 3 (MP3) 编码中，比特储存区的最大大小为 511 字节。
+这意味着编码器可以在比特储存区中储存最多 511 字节的多余比特，以在需要时用于其他帧。
+
+以下是一些详细的原因和背景：
+标准限制: MPEG-1 Layer 3 标准规定，比特储存区的最大大小为 511 字节。
+效率和平衡: 511 字节的比特储存区大小在灵活性和复杂性之间取得了平衡。较大的比特储存区可以提供更多的灵活性，
+但会增加实现的复杂性和延迟。511 字节被认为是一个合适的折衷。
+计算资源: 511 字节在计算上是方便管理的大小，适合硬件和软件实现中的缓存和内存对齐。
+
+实际应用
+在实际应用中，编码器会利用比特储存区来调整比特率。例如，如果一个帧非常复杂，需要更多比特来保持音质，编码器可以使用比特储存区中的比特。
+如果一个帧比较简单，编码器则可以将多余的比特存储到比特储存区中，以便在需要时使用。
+
+总结
+#define MAX_BITRESERVOIR_BYTES 511 这条宏定义了比特储存区的最大字节数为 511，这是根据 MPEG-1 Layer 3 标准的要求设置的。
+这种技术有助于在音频编码过程中平滑比特率的变化，提高编码效率和音质。
+*/
 #define MAX_BITRESERVOIR_BYTES      511
 #define SHORT_BLOCK_TYPE            2
 #define STOP_BLOCK_TYPE             3
