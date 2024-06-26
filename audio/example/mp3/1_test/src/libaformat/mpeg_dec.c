@@ -1193,7 +1193,7 @@ static void _mpeg_dec_parse_audio_frame_header(mpeg_decoder_internal_t* decoder,
                 tmp_header.frame_length = 144 * tmp_header.bitrate / tmp_header.frequency + (tmp_header.paddingbit ? 1 : 0);
                 break;
             case MPEG_LAYER_III: // Layer 3
-                if(tmp_header.version == MPEG_VERSION_2_5)
+                if(tmp_header.version == MPEG_VERSION_1)
                     tmp_header.frame_length = 144 * tmp_header.bitrate / tmp_header.frequency + (tmp_header.paddingbit ? 1 : 0); //Mpeg1
                 else
                     tmp_header.frame_length =  72 * tmp_header.bitrate / tmp_header.frequency + (tmp_header.paddingbit ? 1 : 0); //Mpeg2 + Mpeg2.5
