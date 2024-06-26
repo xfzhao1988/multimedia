@@ -854,8 +854,38 @@ Abstract
    The 'Year' frame is a numeric string with a year of the recording.
    This frames is always four characters long (until the year 10000).
 
+/**
+用户定义的文本信息帧 (TXXX)
+用户定义的文本信息帧 (TXXX) 用于在音频文件中存储自定义文本信息。这个帧类似于其他文本信息帧，但允许存储用户特定的数据。以下是其结构的详细解释：
 
+'用户定义的文本信息帧' 的头部, ID: "TXXX": 这表示 TXXX 帧的开始。
+
+文本编码 $xx: 这表示用于文本字符串的编码。常见的编码值是：
+0: ISO-8859-1 (Latin-1)
+1: 带 BOM 的 UTF-16
+2: 不带 BOM 的 UTF-16BE
+3: UTF-8
+
+描述 <根据编码的文本字符串> $00 (00): 这是一个终止字符串，用于描述自定义文本。终止符根据编码不同而不同：
+对于 ISO-8859-1: $00
+对于 UTF-16: $00 00
+对于 UTF-8: $00
+
+值 <根据编码的文本字符串>: 这是实际的用户定义的文本信息，按照指定的文本编码进行编码。
+
+示例
+如果你想用 UTF-8 编码存储一个描述为 "Producer Info" 的自定义文本 "Producer: John Doe"，TXXX 帧应如下所示：
+
+文本编码: $03 (UTF-8)
+描述: "Producer Info" 后跟 $00（表示终止符）
+值: 用 UTF-8 编码的 "Producer: John Doe"
+
+实际应用
+当你需要向音频文件添加标准帧未涵盖的元数据时（例如，自定义评论、备注或其他特定于音频文件的数据），这个帧非常有用。
+每个标签中可以包含多个 TXXX 帧，只要每个帧的描述是唯一的即可
+*/
 4.2.2.   User defined text information frame
+         用户定义的文本信息帧
 
    This frame is intended for one-string text information concerning the
    audiofile in a similar way to the other "T"-frames. The frame body
@@ -1409,7 +1439,7 @@ Abstract
      Text encoding          $xx
      MIME type              <text string> $00
      Filename               <text string according to encoding> $00 (00)
-     Content description    <text string according to enc�ding> $00 (00)
+     Content description    <text string according to enc�ding> $00 (00)
      Encapsulated object    <binary data>
 
 
@@ -1997,8 +2027,8 @@ A.   Appendix A - Genre List from ID3v1
    Written by
 
      Martin Nilsson
-     Rydsv�gen 246 C. 30
-     S-584 34 Link�ping
+     Rydsv�gen 246 C. 30
+     S-584 34 Link�ping
      Sweden
 
      Email: nilsson@id3.org
@@ -2014,9 +2044,9 @@ A.   Appendix A - Genre List from ID3v1
      Email: dirk@id3.org
 
 
-     Johan Sundstr�m
-     Als�ttersgatan 5 A. 34
-     S-584 35 Link�ping
+     Johan Sundstr�m
+     Als�ttersgatan 5 A. 34
+     S-584 35 Link�ping
      Sweden
 
      Email: johan@id3.org
