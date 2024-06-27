@@ -5,6 +5,11 @@
     To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this software to the public domain worldwide.
     This software is distributed without any warranty.
     See <http://creativecommons.org/publicdomain/zero/1.0/>.
+
+    https://github.com/lieff/minimp3
+    在法律允许的范围内，作者已将此软件的所有版权和相关及邻接权利奉献给全球公共领域。
+    此软件分发时不提供任何担保。
+    请参阅<http://creativecommons.org/publicdomain/zero/1.0/>。
 */
 #include <stdint.h>
 

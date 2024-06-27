@@ -17,14 +17,12 @@ minimp3
 安装perf：首先，确保你的系统上安装了perf工具。在大多数Linux发行版中，perf通常包含在“perf”或“linux-tools”软件包中。你可以使用包管理器来安装它，例如在Ubuntu上可以使用以下命令：
 
 arduino
-复制代码
 sudo apt-get install linux-tools-common linux-tools-generic
 选择性能事件：perf可以监测各种不同的性能事件，例如CPU周期、指令执行数、缓存命中率等。你可以使用perf list命令来列出所有可用的性能事件，并选择你感兴趣的事件。
 
 运行perf：使用perf命令启动你要测试的程序，并将性能事件作为参数传递给perf。例如，要监测一个名为“my_program”的程序的CPU周期，你可以运行以下命令：
 
 bash
-复制代码
 perf stat -e cycles ./my_program
 分析结果：perf会在程序运行结束后输出性能指标的统计信息。你可以分析这些信息来了解程序的性能状况，找出性能瓶颈所在，并进行优化。perf还可以生成一些报告，如调用图、热点函数等，帮助你更好地理解程序的性能特征。
 
@@ -32,6 +30,10 @@ perf stat -e cycles ./my_program
 
 总的来说，perf是一个非常强大的性能分析工具，可以帮助开发者深入了解程序的性能特征，并进行针对性的优化。
  */
+/**
+SSE (Streaming SIMD Extensions) 支持：在 x86 平台上，minimp3 利用 SSE 指令集来加速解码过程。
+NEON (Advanced SIMD) 支持：在 ARM 平台上，minimp3 利用 NEON 指令集来加速解码过程。
+*/
 Minimalistic, single-header library for decoding MP3. minimp3 is designed to be
 small, fast (with SSE and NEON support), and accurate (ISO conformant). You can
 find a rough benchmark below, measured using ``perf`` on an i7-6700K, IO
@@ -121,9 +123,9 @@ Also you can use ``MINIMP3_ONLY_MP3`` define to strip MP1/MP2 decoding code.
 您还可以使用“MINIMP3_ONLY_MP3”定义来剥离 MP1/MP2 解码代码。
 /**
  * 这个描述指的是在使用minimp3库时，MINIMP3_ONLY_SIMD宏定义控制着是否启用了SIMD（Single Instruction, Multiple Data）
- * 指令集的优  化。SIMD指令集允许一次性对多个数据执行相同的操作，从而提高了计算效率，特别是在音频处理等需要大量数据处理的场景下。
- * MINIMP3_ONLY_SIMD宏定义的作用是控制是否仅仅启用了SIMD指令集的优化，而不使用其他任何特定于硬件的优化。当MINIMP3_ONLY_SIMD被定义* * 时，意味着代码将会生成一个通用的、非SSE（Streaming SIMD Extensions）或NEON（ARM的SIMD指令集）的版本，即便在支持这些指令集的环境下* 也是如此。这样可以确保代码在不同的平台上都能够运行，并且对于一些不支持特定SIMD指令集的环境，也可以保证代码的兼容性。
- * 然而，需要注意的是，在x64（64位x86架构）和arm64（64位ARM架构）目标平台上，MINIMP3_ONLY_SIMD宏定义总是被启用的。这是因为这些平台通* 常支持较新的SIMD指令集，而且编译器在这些平台上可能会生成更有效率的SIMD代码，因此即使定义了MINIMP3_ONLY_SIMD宏，也会使用SIMD指令集* 的优化
+ * 指令集的优化。SIMD指令集允许一次性对多个数据执行相同的操作，从而提高了计算效率，特别是在音频处理等需要大量数据处理的场景下。
+ * MINIMP3_ONLY_SIMD宏定义的作用是控制是否仅仅启用了SIMD指令集的优化，而不使用其他任何特定于硬件的优化。当MINIMP3_ONLY_SIMD被定义* 时，意味着代码将会生成一个通用的、非SSE（Streaming SIMD Extensions）或NEON（ARM的SIMD指令集）的版本，即便在支持这些指令集的环* 境下也是如此。这样可以确保代码在不同的平台上都能够运行，并且对于一些不支持特定SIMD指令集的环境，也可以保证代码的兼容性。
+ * 然而，需要注意的是，在x64（64位x86架构）和arm64（64位ARM架构）目标平台上，MINIMP3_ONLY_SIMD宏定义总是被启用的。这是因为这些平台* 通常支持较新的SIMD指令集，而且编译器在这些平台上可能会生成更有效率的SIMD代码，因此即使定义了MINIMP3_ONLY_SIMD宏，也会使用SIMD指* 令集的优化
  */
 MINIMP3_ONLY_SIMD define controls generic (non SSE/NEON) code generation (always enabled on x64/arm64 targets).
 MINIMP3_ONLY_SIMD 定义控制通用（非 SSE/NEON）代码生成（始终在 x64/arm64 目标上启用）。
@@ -278,10 +280,15 @@ Just ``#include`` ``minimp3_ex.h`` instead and use following additional function
 #define MP3D_SEEK_TO_SAMPLE 1
 
 #define MINIMP3_PREDECODE_FRAMES 2 /* frames to pre-decode and skip after seek (to fill internal structures) */
+                                   /* 预解码并在搜索后跳过的帧（以填充内部结构）*/
 /*#define MINIMP3_SEEK_IDX_LINEAR_SEARCH*/ /* define to use linear index search instead of binary search on seek */
+                                           /* 定义为在查找时使用线性索引搜索而不是二进制搜索 */
 #define MINIMP3_IO_SIZE (128*1024) /* io buffer size for streaming functions, must be greater than MINIMP3_BUF_SIZE */
+                                   /* 流式传输功能的 io 缓冲区大小必须大于 MINIMP3_BUF_SIZE */
 #define MINIMP3_BUF_SIZE (16*1024) /* buffer which can hold minimum 10 consecutive mp3 frames (~16KB) worst case */
+                                   /* 流式传输功能的 io 缓冲区大小必须大于 MINIMP3_BUF_SIZE */
 #define MINIMP3_ENABLE_RING 0      /* enable hardware magic ring buffer if available, to make less input buffer memmove(s) in callback IO mode */
+                                   /* 如果可用，启用硬件魔术环缓冲区，以在回调 IO 模式下减少输入缓冲区的 memmove */
 
 #define MP3D_E_MEMORY  -1
 #define MP3D_E_IOERROR -2
@@ -290,6 +297,7 @@ typedef struct
 {
     mp3d_sample_t *buffer;
     size_t samples; /* channels included, byte size = samples*sizeof(mp3d_sample_t) */
+                    /* 包含的通道，字节大小 = 样本*sizeof(mp3d_sample_t) */
     int channels, hz, layer, avg_bitrate_kbps;
 } mp3dec_file_info_t;
 
@@ -316,19 +324,26 @@ typedef int (*MP3D_ITERATE_CB)(void *user_data, const uint8_t *frame, int frame_
 typedef int (*MP3D_PROGRESS_CB)(void *user_data, size_t file_size, uint64_t offset, mp3dec_frame_info_t *info);
 
 /* decode whole buffer block */
+/* 解码整个缓冲块 */
 int mp3dec_load_buf(mp3dec_t *dec, const uint8_t *buf, size_t buf_size, mp3dec_file_info_t *info, MP3D_PROGRESS_CB progress_cb, void *user_data);
 int mp3dec_load_cb(mp3dec_t *dec, mp3dec_io_t *io, uint8_t *buf, size_t buf_size, mp3dec_file_info_t *info, MP3D_PROGRESS_CB progress_cb, void *user_data);
+
 /* iterate through frames */
+/* 遍历帧 */
 int mp3dec_iterate_buf(const uint8_t *buf, size_t buf_size, MP3D_ITERATE_CB callback, void *user_data);
 int mp3dec_iterate_cb(mp3dec_io_t *io, uint8_t *buf, size_t buf_size, MP3D_ITERATE_CB callback, void *user_data);
+
 /* streaming decoder with seeking capability */
+/* 具有寻址能力的流媒体解码器 */
 int mp3dec_ex_open_buf(mp3dec_ex_t *dec, const uint8_t *buf, size_t buf_size, int seek_method);
 int mp3dec_ex_open_cb(mp3dec_ex_t *dec, mp3dec_io_t *io, int seek_method);
 void mp3dec_ex_close(mp3dec_ex_t *dec);
 int mp3dec_ex_seek(mp3dec_ex_t *dec, uint64_t position);
 size_t mp3dec_ex_read(mp3dec_ex_t *dec, mp3d_sample_t *buf, size_t samples);
+
 #ifndef MINIMP3_NO_STDIO
 /* stdio versions of file load, iterate and stream */
+/* 文件加载、迭代和流的 stdio 版本 */
 int mp3dec_load(mp3dec_t *dec, const char *file_name, mp3dec_file_info_t *info, MP3D_PROGRESS_CB progress_cb, void *user_data);
 int mp3dec_iterate(const char *file_name, MP3D_ITERATE_CB callback, void *user_data);
 int mp3dec_ex_open(mp3dec_ex_t *dec, const char *file_name, int seek_method);
@@ -341,14 +356,17 @@ int mp3dec_ex_open_w(mp3dec_ex_t *dec, const wchar_t *file_name, int seek_method
 ```
 
 Use MINIMP3_NO_STDIO define to exclude STDIO functions.
+使用 MINIMP3_NO_STDIO 定义来排除 STDIO 功能。
+
 MINIMP3_ALLOW_MONO_STEREO_TRANSITION allows mixing mono and stereo in same file.
+MINIMP3_ALLOW_MONO_STEREO_TRANSITION 允许在同一个文件中混合单声道和立体声。
+
 In that case ``mp3dec_frame_info_t->channels = 0`` is reported on such files and correct channels number passed to progress_cb callback for each frame in mp3dec_frame_info_t structure.
+在这种情况下，此类文件会报告“mp3dec_frame_info_t->channels = 0”，并且 mp3dec_frame_info_t 结构中每一帧的正确通道号都会传递给 progress_cb 回调。
+
 MP3D_PROGRESS_CB is optional and can be NULL, example of file decoding:
-使用 MINIMP3_NO_STDIO 定义排除 STDIO 函数。
-MINIMP3_ALLOW_MONO_STEREO_TRANSITION 允许在同一文件中混合单声道和立体声。
-在这种情况下，此类文件会报告 ``mp3dec_frame_info_t->channels = 0``，并将正确的声道号传递给
-mp3dec_frame_info_t 结构中每帧的 progress_cb 回调。
 MP3D​​_PROGRESS_CB 是可选的，可以为 NULL，文件解码示例：
+
 
 ```c
     mp3dec_t mp3d;
@@ -359,9 +377,11 @@ MP3D​​_PROGRESS_CB 是可选的，可以为 NULL，文件解码示例：
     }
     /* mp3dec_file_info_t contains decoded samples and info,
        use free(info.buffer) to deallocate samples */
+    /* mp3dec_file_info_t 包含解码的样本和信息，使用 free(info.buffer) 释放样本 */
 ```
 
 Example of file decoding with seek capability:
+具有搜索功能的文件解码示例：
 
 ```c
     mp3dec_ex_t dec;
@@ -370,13 +390,14 @@ Example of file decoding with seek capability:
         /* error */
     }
     /* dec.samples, dec.info.hz, dec.info.layer, dec.info.channels should be filled */
+    /* dec.samples、dec.info.hz、dec.info.layer、dec.info.channels 应填写 */
     if (mp3dec_ex_seek(&dec, position))
     {
         /* error */
     }
     mp3d_sample_t *buffer = malloc(dec.samples*sizeof(mp3d_sample_t));
     size_t readed = mp3dec_ex_read(&dec, buffer, dec.samples);
-    if (readed != dec.samples) /* normal eof or error condition */
+    if (readed != dec.samples) /* normal eof or error condition 正常 eof 或错误情况 */
     {
         if (dec.last_error)
         {
@@ -385,7 +406,7 @@ Example of file decoding with seek capability:
     }
 ```
 
-## Bindings
+## Bindings 绑定
 
  * https://github.com/tosone/minimp3 - go bindings
  * https://github.com/notviri/rmp3 - rust `no_std` bindings which don't allocate.
@@ -396,7 +417,7 @@ Example of file decoding with seek capability:
  * https://github.com/DasZiesel/minimp3-delphi - delphi bindings
  * https://github.com/mgeier/minimp3_ex-sys - low-level rust bindings to `minimp3_ex`
 
-## Interesting links
+## Interesting links 有趣的链接
 
  * https://keyj.emphy.de/minimp3/
  * https://github.com/technosaurus/PDMP3
@@ -405,7 +426,7 @@ Example of file decoding with seek capability:
  * https://sites.google.com/a/kmlager.com/www/projects
  * https://sourceforge.net/projects/mp3dec/
  * http://blog.bjrn.se/2008/10/lets-build-mp3-decoder.html
- * http://www.mp3-converter.com/mp3codec/
+ * http://www.mp3-converter.com/mp3codec/：important
  * http://www.multiweb.cz/twoinches/mp3inside.htm
  * https://www.mp3-tech.org/
  * https://id3.org/mp3Frame
