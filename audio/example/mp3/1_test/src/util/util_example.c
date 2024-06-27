@@ -8,11 +8,10 @@
 
 void u_util_example_bit_stream(void)
 {
-    uint32_t val = 0x55; //0101 0101
     bit_stream_t bs = {0};
-    uint8_t* buff = (uint8_t*)&val;
+    uint8_t buff[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
 
-    u_bit_stream_init(&bs, buff, sizeof(val));
+    u_bit_stream_init(&bs, buff, sizeof(buff));
 
-    DBG_INFO("%ld\n", u_bit_stream_get_bits(&bs, 1));
+    DBG_INFO("%ld\n", u_bit_stream_get_bits(&bs, 8));
 }
