@@ -12,7 +12,7 @@
 
 #include "dbg.h"
 #include "test.h"
-#include "bs.h"
+#include "u_bit_stream.h"
 #include "u_byte_swap.h"
 
 

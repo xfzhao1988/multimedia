@@ -3,7 +3,7 @@
 #include "dbg.h"
 #include "mpeg_dec.h"
 #include "list.h"
-#include "bs.h"
+#include "u_bit_stream.h"
 #include "u_byte_stream.h"
 
 #define ID3V2_TAG_HEADER_SIZE 10
@@ -292,6 +292,7 @@ typedef struct
     id3_tag_info_t id3;
     struct list_head header_list;
     bool is_first_header_parsed;
+    bool has_header_tag;
     uint8_t buf[MP3_BUF_SIZE];
     uint64_t remain_data_size;
     uint32_t total_frames;
@@ -299,6 +300,7 @@ typedef struct
     uint64_t total_parsed;
     uint64_t duration;
     bitrate_type_e bit_rate_type;
+    uint32_t free_format_bytes;
 } audio_info_t;
 
 typedef struct
@@ -685,18 +687,18 @@ static bool _mpeg_dec_hdr_valid(const uint8_t *h)
            (HDR_GET_SAMPLE_RATE(h) != 3);
 }
 
-static int _mpeg_dec_hdr_padding(const uint8_t *h)
+static uint8_t _mpeg_dec_hdr_padding(const uint8_t *h)
 {
     return HDR_TEST_PADDING(h) ? (HDR_IS_LAYER_1(h) ? 4 : 1) : 0;
 }
 
-static unsigned _mpeg_dec_hdr_sample_rate_hz(const uint8_t *h)
+static uint32_t _mpeg_dec_hdr_sample_rate_hz(const uint8_t *h)
 {
-    static const unsigned g_hz[3] = { 44100, 48000, 32000 };
-    return g_hz[HDR_GET_SAMPLE_RATE(h)] >> (int)!HDR_TEST_MPEG1(h) >> (int)!HDR_TEST_NOT_MPEG25(h);
+    static const uint32_t g_hz[3] = { 44100, 48000, 32000 };
+    return g_hz[HDR_GET_SAMPLE_RATE(h)] >> (uint8_t)!HDR_TEST_MPEG1(h) >> (uint8_t)!HDR_TEST_NOT_MPEG25(h);
 }
 
-static unsigned _mpeg_dec_hdr_bitrate_kbps(const uint8_t *h)
+static uint32_t _mpeg_dec_hdr_bitrate_kbps(const uint8_t *h)
 {
     static const uint8_t halfrate[2][3][15] = {
         { { 0,4,8,12,16,20,24,28,32,40,48,56,64,72,80 }, { 0,4,8,12,16,20,24,28,32,40,48,56,64,72,80 }, { 0,16,24,28,32,40,48,56,64,72,80,88,96,112,128 } },
@@ -705,12 +707,12 @@ static unsigned _mpeg_dec_hdr_bitrate_kbps(const uint8_t *h)
     return 2*halfrate[!!HDR_TEST_MPEG1(h)][HDR_GET_LAYER(h) - 1][HDR_GET_BITRATE(h)];
 }
 
-static unsigned _mpeg_dec_hdr_frame_samples(const uint8_t *h)
+static uint32_t _mpeg_dec_hdr_frame_samples(const uint8_t *h)
 {
-    return HDR_IS_LAYER_1(h) ? 384 : (1152 >> (int)HDR_IS_FRAME_576(h));
+    return HDR_IS_LAYER_1(h) ? 384 : (1152 >> (uint32_t)HDR_IS_FRAME_576(h));
 }
 
-static int _mpeg_dec_hdr_compare(const uint8_t *h1, const uint8_t *h2)
+static uint8_t _mpeg_dec_hdr_compare(const uint8_t *h1, const uint8_t *h2)
 {
     /**
      * (h1[1] ^ h2[1]) & 0xFE) == 0:表示h1和h2均为mpeg帧的帧头
@@ -723,9 +725,9 @@ static int _mpeg_dec_hdr_compare(const uint8_t *h1, const uint8_t *h2)
            !(HDR_IS_FREE_FORMAT(h1) ^ HDR_IS_FREE_FORMAT(h2));
 }
 
-static int _mpeg_dec_hdr_frame_bytes(const uint8_t *h, int free_format_size)
+static uint32_t _mpeg_dec_hdr_frame_bytes(const uint8_t *h, uint32_t free_format_size)
 {
-    int frame_bytes = _mpeg_dec_hdr_frame_samples(h) * _mpeg_dec_hdr_bitrate_kbps(h) * 125/_mpeg_dec_hdr_sample_rate_hz(h);
+    uint32_t frame_bytes = _mpeg_dec_hdr_frame_samples(h) * _mpeg_dec_hdr_bitrate_kbps(h) * 125/_mpeg_dec_hdr_sample_rate_hz(h);
 
     if (HDR_IS_LAYER_1(h))
     {
@@ -735,9 +737,9 @@ static int _mpeg_dec_hdr_frame_bytes(const uint8_t *h, int free_format_size)
     return frame_bytes ? frame_bytes : free_format_size;
 }
 
-static int _mpeg_dec_match_frame(const uint8_t *hdr, int mp3_bytes, int frame_bytes)
+static uint32_t _mpeg_dec_match_frame(const uint8_t *hdr, uint32_t mp3_bytes, uint32_t frame_bytes)
 {
-    int i, nmatch;
+    uint32_t i, nmatch;
 
     for (i = 0, nmatch = 0; nmatch < MAX_FRAME_SYNC_MATCHES; nmatch++)
     {
@@ -757,60 +759,105 @@ static int _mpeg_dec_match_frame(const uint8_t *hdr, int mp3_bytes, int frame_by
 }
 
 static int32_t _mpeg_dec_find_audio_frame_header(const uint8_t *mpeg_pdata,
-                                                 int mpeg_bytes,
-                                                 int *free_format_bytes,
-                                                 int *ptr_frame_bytes)
+                                                 uint32_t mpeg_bytes,
+                                                 uint32_t* free_format_bytes,
+                                                 uint32_t* ptr_frame_bytes,
+                                                 uint32_t* skip_size)
 {
-    int i, k;
-    for (i = 0; i < mpeg_bytes - MPEG_AUDIO_FRAME_HEADER_LEN; i++, mpeg_pdata++)
+    if(mpeg_bytes <= MPEG_AUDIO_FRAME_HEADER_LEN)
+    {
+        *skip_size = 0;
+        goto NEED_MORE_DATA;
+    }
+
+    uint32_t i, k;
+    int32_t ret = MPEG_DEC_ENEED_MORE_DATA;
+    uint32_t frame_bytes = 0;
+    uint32_t frame_and_padding = 0;
+
+    for (i = 0; i + MPEG_AUDIO_FRAME_HEADER_LEN < mpeg_bytes; i++, mpeg_pdata++)
     {
         if (_mpeg_dec_hdr_valid(mpeg_pdata))
         {
-            int frame_bytes = _mpeg_dec_hdr_frame_bytes(mpeg_pdata, *free_format_bytes);
-            int frame_and_padding = frame_bytes + _mpeg_dec_hdr_padding(mpeg_pdata);
+            frame_bytes = _mpeg_dec_hdr_frame_bytes(mpeg_pdata, *free_format_bytes);
+            frame_and_padding = frame_bytes + _mpeg_dec_hdr_padding(mpeg_pdata);
 
-            /**
-             * i + 2*k < mpeg_bytes - HDR_SIZE解释：表示有两个自由帧的长度字节数i + 2*k没有超过mp3_bytes - HDR_SIZE的size
-            */
-            for (k = MPEG_AUDIO_FRAME_HEADER_LEN; !frame_bytes && k < MAX_FREE_FORMAT_FRAME_SIZE && i + 2*k < mpeg_bytes - MPEG_AUDIO_FRAME_HEADER_LEN; k++)
+            if(0 == frame_bytes) // check free format and calculate free format frame size
             {
-                if (_mpeg_dec_hdr_compare(mpeg_pdata, mpeg_pdata + k))//mp3开始处为当前的自由帧，mp3+k为下一个自由帧开始处
+                bool found_free_format = false;
+
+                for (k = MPEG_AUDIO_FRAME_HEADER_LEN; k < MAX_FREE_FORMAT_FRAME_SIZE && i + 2*k + MPEG_AUDIO_FRAME_HEADER_LEN < mpeg_bytes; k++)
                 {
-                    int fb = k - _mpeg_dec_hdr_padding(mpeg_pdata);//mp3自由帧的帧长，不包含padding
-                    int nextfb = fb + _mpeg_dec_hdr_padding(mpeg_pdata + k);//mpeg_pdata+k自由帧的帧长，包含其padding
-                    //判断是否和下下一个自由帧相等
-                    if (i + k + nextfb + MPEG_AUDIO_FRAME_HEADER_LEN > mpeg_bytes || !_mpeg_dec_hdr_compare(mpeg_pdata, mpeg_pdata + k + nextfb))
-                        continue;
-                    frame_and_padding = k;
-                    frame_bytes = fb;
-                    *free_format_bytes = nextfb; // 自由帧的帧长，包含填充
+                    if (_mpeg_dec_hdr_compare(mpeg_pdata, mpeg_pdata + k))
+                    {
+                        uint32_t fb = k - _mpeg_dec_hdr_padding(mpeg_pdata);
+                        uint32_t nextfb = fb + _mpeg_dec_hdr_padding(mpeg_pdata + k);
+
+                        if(i + k + nextfb + MPEG_AUDIO_FRAME_HEADER_LEN > mpeg_bytes)
+                        {
+                            *skip_size = i;
+                            goto NEED_MORE_DATA;
+                        }
+
+                        if(!_mpeg_dec_hdr_compare(mpeg_pdata, mpeg_pdata + k + nextfb)) // the third frame not match
+                        {
+                            continue;
+                        }
+
+                        frame_and_padding = k;
+                        frame_bytes = fb;
+                        *free_format_bytes = fb;
+                        found_free_format = true;
+                        break; //break自由帧match循环
+                    }
+                }
+
+                if(!found_free_format)
+                {
+                    // 由于数据不足未能找到三帧相同格式的自由帧，需要补充数据再来match
+                    if((k < MAX_FREE_FORMAT_FRAME_SIZE && i + 2*k + MPEG_AUDIO_FRAME_HEADER_LEN >= mpeg_bytes))
+                    {
+                        ret = MPEG_DEC_ENEED_MORE_DATA;
+                        break;
+                    }
+                    else
+                    {
+                        continue; //继续for (i = 0; i + MPEG_AUDIO_FRAME_HEADER_LEN < mpeg_bytes; i++, mpeg_pdata++)查找有效帧
+                    }
                 }
             }
-            /**
-             * !i && frame_and_padding >= mpeg_bytes: 表示mp3_bytes可能为一帧数据，但是由于数据不足，不好判断，需要更多数据
-            */
-            if ((frame_bytes && i + frame_and_padding <= mpeg_bytes &&
-                _mpeg_dec_match_frame(mpeg_pdata, mpeg_bytes - i, frame_bytes)) ||
-                (!i && frame_and_padding >= mpeg_bytes))
-            {
-                *ptr_frame_bytes = frame_and_padding;
 
-                return i;
+            if(frame_bytes && i + frame_and_padding > mpeg_bytes)
+            {
+                ret = MPEG_DEC_ENEED_MORE_DATA;
+                break;
             }
 
-            *free_format_bytes = 0;
+            if ((frame_bytes && i + frame_and_padding <= mpeg_bytes &&
+                _mpeg_dec_match_frame(mpeg_pdata, mpeg_bytes - i, frame_bytes)) ||
+                (!i && frame_and_padding == mpeg_bytes))
+            {
+                *ptr_frame_bytes = frame_and_padding;
+                ret = MPEG_DEC_EOK;
+                break;
+            }
+
         }
     }
 
-    *ptr_frame_bytes = 0;
+    *skip_size = i;
 
-    return mpeg_bytes;
+    return ret;
+
+NEED_MORE_DATA:
+
+    return MPEG_DEC_ENEED_MORE_DATA;
 }
 
 static void _mpeg_dec_audio_info_print(audio_info_t* info)
 {
     mpeg_audio_frame_header_info_t* pos = NULL;
-    int count = 0;
+    uint32_t count = 0;
     printf("%d frames as follows: \n", info->total_frames);
     uint32_t last_frame_pos = 0;
     uint32_t last_frame_length = 0;
@@ -931,7 +978,7 @@ static bool _mpeg_dec_parse_VBRI_tag(mpeg_decoder_internal_t* decoder,
             /* skip delay and quality */
             u_byte_stream_skip(&tmp_gcxt, 4);
             decoder->info.total_file_size = u_byte_stream_get_be32(&tmp_gcxt);
-            decoder->info.total_frames = u_byte_stream_get_be32(&tmp_gcxt);
+            decoder->info.total_frames = u_byte_stream_get_be32(&tmp_gcxt); //不包含首帧
             decoder->info.duration = 1000* decoder->info.total_frames * header->samples_per_frame / header->frequency; //ms
             decoder->info.bit_rate_type = BITRATE_TYPE_VBR;
 
@@ -956,7 +1003,7 @@ static bool _mpeg_dec_parse_Xing_Info_tag(mpeg_decoder_internal_t* decoder,
     /  MPEG1          17     32
     /  MPEG2 & 2.5     9     17*/
     static const int64_t xing_offtbl[2][2] = {{32, 17}, {17,9}};
-    int lsf = 0;
+    uint8_t lsf = 0;
     uint32_t side_info_offset = 0;
     get_byte_context_t tmp_gcxt = {0};
     uint32_t val;
@@ -1019,7 +1066,7 @@ static bool _mpeg_dec_parse_Xing_Info_tag(mpeg_decoder_internal_t* decoder,
     val = u_byte_stream_get_be32(&tmp_gcxt);
     if (val & XING_FLAG_FRAMES)
     {
-        decoder->info.total_frames = u_byte_stream_get_be32(&tmp_gcxt);
+        decoder->info.total_frames = u_byte_stream_get_be32(&tmp_gcxt); //不包含首帧
     }
 
     if(val & XING_FLAG_SIZE)
@@ -1039,21 +1086,21 @@ static bool _mpeg_dec_parse_Xing_Info_tag(mpeg_decoder_internal_t* decoder,
 
 static void _mpeg_dec_parse_audio_frame_header(mpeg_decoder_internal_t* decoder,
                                                get_byte_context_t* gctx,
-                                               int free_format_bytes)
+                                               uint32_t free_format_bytes)
 {
-    int version_index;
-    bs_t bs = {0};
+    uint8_t version_index;
+    bit_stream_t bs = {0};
 
-    bs_init(&bs, gctx->buffer, MPEG_AUDIO_FRAME_HEADER_LEN);
+    u_bit_stream_init(&bs, gctx->buffer, MPEG_AUDIO_FRAME_HEADER_LEN);
 
     mpeg_audio_frame_header_info_t tmp_header = {0};
     _mpeg_dec_reset_audio_frame_header(&tmp_header);
 
     // skip sync id
-    skip_bits(&bs, 11);
+    u_bit_stream_skip_bits(&bs, 11);
 
     // Version
-    switch (get_bits(&bs, 2))
+    switch (u_bit_stream_get_bits(&bs, 2))
     {
     case 0:
         tmp_header.version = MPEG_VERSION_2_5;
@@ -1073,7 +1120,7 @@ static void _mpeg_dec_parse_audio_frame_header(mpeg_decoder_internal_t* decoder,
     }
 
     // Layer
-    switch (get_bits(&bs, 2))
+    switch (u_bit_stream_get_bits(&bs, 2))
     {
     case 0:
         DBG_ERROR("invalid mpeg layer\n");
@@ -1090,10 +1137,10 @@ static void _mpeg_dec_parse_audio_frame_header(mpeg_decoder_internal_t* decoder,
     }
 
     // Protection bit
-    tmp_header.crc = (mpeg_crc_e)!(bool)get_bits(&bs, 1);
+    tmp_header.crc = (mpeg_crc_e)!(bool)u_bit_stream_get_bits(&bs, 1);
 
     // Bitrate
-    uint8_t bitrate_index = get_bits(&bs, 4);
+    uint8_t bitrate_index = u_bit_stream_get_bits(&bs, 4);
     tmp_header.bitrate = _mpeg_bitrate_table[version_index][3-tmp_header.layer][bitrate_index];
     if (tmp_header.bitrate == MPEG_BITRATE_FALSE)
     {
@@ -1101,7 +1148,7 @@ static void _mpeg_dec_parse_audio_frame_header(mpeg_decoder_internal_t* decoder,
     }
 
     // Sampling rate
-    uint8_t sample_rate_index =  get_bits(&bs, 2);
+    uint8_t sample_rate_index =  u_bit_stream_get_bits(&bs, 2);
     tmp_header.frequency = _mpeg_frequency_table[tmp_header.version][sample_rate_index];
     if (tmp_header.frequency == MPEG_FREQUENCIES_Reserved)
     {
@@ -1109,13 +1156,13 @@ static void _mpeg_dec_parse_audio_frame_header(mpeg_decoder_internal_t* decoder,
     }
 
     // Padding bit
-    tmp_header.paddingbit = get_bits(&bs, 1);
+    tmp_header.paddingbit = u_bit_stream_get_bits(&bs, 1);
 
     // Private bit
-    tmp_header.privatebit = get_bits(&bs, 1);
+    tmp_header.privatebit = u_bit_stream_get_bits(&bs, 1);
 
     // Channel Mode
-    switch (get_bits(&bs, 2))
+    switch (u_bit_stream_get_bits(&bs, 2))
     {
         case 0:
             tmp_header.channelmode = MPEG_CHANNEL_MODE_STEREO;
@@ -1135,7 +1182,7 @@ static void _mpeg_dec_parse_audio_frame_header(mpeg_decoder_internal_t* decoder,
     if (tmp_header.channelmode == MPEG_CHANNEL_MODE_JOINT_STEREO)
     {
         // these have a different meaning for different layers, better give them a generic name in the enum
-        switch (get_bits(&bs, 2))
+        switch (u_bit_stream_get_bits(&bs, 2))
         {
             case 0:
                 tmp_header.modeext = MPEG_MODE_EXT_0;
@@ -1153,18 +1200,18 @@ static void _mpeg_dec_parse_audio_frame_header(mpeg_decoder_internal_t* decoder,
     }
     else //it's valid to have a valid false one in this case, since it's only used with joint stereo
     {
-        skip_bits(&bs, 2);
+        u_bit_stream_skip_bits(&bs, 2);
         tmp_header.modeext = MPEG_MODE_EXT_FALSE;
     }
 
     // Copyright
-    tmp_header.copyrighted = get_bits(&bs, 1);
+    tmp_header.copyrighted = u_bit_stream_get_bits(&bs, 1);
 
     // Original
-    tmp_header.copyrighted = get_bits(&bs, 1);
+    tmp_header.copyrighted = u_bit_stream_get_bits(&bs, 1);
 
     // Emphasis
-    switch (get_bits(&bs, 2))
+    switch (u_bit_stream_get_bits(&bs, 2))
     {
         case 0:
             tmp_header.emphasis = MPEG_EMPHASIS_NONE;
@@ -1246,10 +1293,12 @@ static void _mpeg_dec_parse_audio_frame_header(mpeg_decoder_internal_t* decoder,
             // parse vbr tags: Xing/Info tag or VBRI tag
             if(_mpeg_dec_parse_VBRI_tag(decoder, gctx, &tmp_header))
             {
+                decoder->info.has_header_tag = true;
                 DBG_INFO("VBRI tag hit\n");
             }
             else if(_mpeg_dec_parse_Xing_Info_tag(decoder, gctx, &tmp_header))
             {
+                decoder->info.has_header_tag = true;
                 DBG_INFO("Xing/Info tag hit\n");
             }
             else
@@ -1257,11 +1306,21 @@ static void _mpeg_dec_parse_audio_frame_header(mpeg_decoder_internal_t* decoder,
                 if (tmp_header.bitrate != MPEG_BITRATE_NONE && tmp_header.frequency > 0)
                 {
                     decoder->info.bit_rate_type = BITRATE_TYPE_FREE;
+                    decoder->info.free_format_bytes = tmp_header.bitrate;
                 }
                 DBG_INFO("No tag hit\n");
+                decoder->info.has_header_tag = false;
+                decoder->info.total_frames++;
             }
         }
-        decoder->info.total_frames++;
+        else
+        {
+            if(!decoder->info.has_header_tag)
+            {
+                decoder->info.total_frames++;
+            }
+        }
+
     }
 
 
@@ -1283,28 +1342,33 @@ static int32_t _mpeg_dec_parse_audio_frame(mpeg_decoder_internal_t* decoder,
 
     int32_t ret = MPEG_DEC_EOK;
     static uint32_t debut_frame_count = 0;
-
     get_byte_context_t gctx = {0};
-    int pos = 0;
 
     u_byte_stream_init(&gctx, decoder->info.buf, decoder->info.remain_data_size);
 
     do
     {
-        int free_format_bytes = 0;
-        int frame_size = 0;
-        int mpeg_bytes = u_byte_stream_get_bytes_left(&gctx);
+        uint32_t free_format_bytes = decoder->info.free_format_bytes;
+        uint32_t frame_size = 0;
+        uint32_t skip_size = 0;
+        uint32_t mpeg_bytes = u_byte_stream_get_bytes_left(&gctx);
         const uint8_t* mpeg_pdata = gctx.buffer;
 
-        pos = _mpeg_dec_find_audio_frame_header(mpeg_pdata,
+        ret = _mpeg_dec_find_audio_frame_header(mpeg_pdata,
                                                 mpeg_bytes,
                                                 &free_format_bytes,
-                                                &frame_size);
-        //DBG_INFO("pos: %d, frame_size: %d, free_format_bytes: %d, %d\n", pos, frame_size, free_format_bytes,  u_byte_stream_get_bytes_left(&gctx));
-        u_byte_stream_skip(&gctx, pos);
-        if(pos && !frame_size)
+                                                &frame_size,
+                                                &skip_size);
+        //DBG_INFO("skip_size: %d, frame_size: %d, free_format_bytes: %d, %d\n", skip_size, frame_size, free_format_bytes,  u_byte_stream_get_bytes_left(&gctx));
+        if(skip_size > 0)
         {
-            continue;
+            u_byte_stream_skip(&gctx, skip_size);
+        }
+
+        // not found and need more data
+        if(MPEG_DEC_ENEED_MORE_DATA == ret)
+        {
+            break;
         }
         if(!frame_size ||
            (frame_size && u_byte_stream_get_bytes_left(&gctx) < frame_size))
@@ -1405,7 +1469,7 @@ int32_t mpeg_dec_parse_file(mpeg_decoder dec,
     DBG_INFO("file_name: %s, flags: 0x%08x\n", file_name, flags);
 
     mpeg_decoder_internal_t* decoder = dec;
-    int ret = MPEG_DEC_EOK;
+    int32_t ret = MPEG_DEC_EOK;
     long int file_size = 0; // 文件size
     long int readed = 0; // 已读size
     size_t need_read = 0; // 每次读取循环将要读取的size
