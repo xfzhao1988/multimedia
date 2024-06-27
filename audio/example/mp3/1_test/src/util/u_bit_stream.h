@@ -16,7 +16,7 @@ typedef struct
     uint64_t limit;
 } bit_stream_t;
 
-static inline void u_bit_stream_bs_init(bit_stream_t* bs, const uint8_t* data, int bytes)
+static inline void u_bit_stream_init(bit_stream_t* bs, const uint8_t* data, int bytes)
 {
     bs->buf   = data;
     bs->pos   = 0;
