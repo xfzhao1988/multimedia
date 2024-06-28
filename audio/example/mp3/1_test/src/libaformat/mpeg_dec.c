@@ -979,7 +979,7 @@ static bool _mpeg_dec_parse_VBRI_tag(mpeg_decoder_internal_t* decoder,
             u_byte_stream_skip(&tmp_gcxt, 4);
             decoder->info.total_file_size = u_byte_stream_get_be32(&tmp_gcxt);
             decoder->info.total_frames = u_byte_stream_get_be32(&tmp_gcxt); //不包含首帧
-            decoder->info.duration = 1000* decoder->info.total_frames * header->samples_per_frame / header->frequency; //ms
+            decoder->info.duration = 1000 * ((uint64_t)decoder->info.total_frames * (uint64_t)header->samples_per_frame / (uint64_t)header->frequency); //ms
             decoder->info.bit_rate_type = BITRATE_TYPE_VBR;
 
             DBG_INFO("%ld, %d, %ld\n",
@@ -1074,7 +1074,8 @@ static bool _mpeg_dec_parse_Xing_Info_tag(mpeg_decoder_internal_t* decoder,
         decoder->info.total_file_size = u_byte_stream_get_be32(&tmp_gcxt);
     }
 
-    decoder->info.duration = 1000* decoder->info.total_frames * header->samples_per_frame / header->frequency; //ms
+    decoder->info.duration = 1000 * ((uint64_t)decoder->info.total_frames * (uint64_t)header->samples_per_frame / (uint64_t)header->frequency); //ms
+
 
     DBG_INFO("%ld, %d, %ld\n",
              decoder->info.total_file_size,
